@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>강의실 시간표</title>
+  <style>
+    :root {
+      --line: #d7dde7;
+      --text: #1f2937;
+      --muted: #667085;
+      --header: #f6f8fb;
+      --accent: #1f5f8b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", Arial, sans-serif;
+      color: var(--text);
+      background: #ffffff;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 14px 18px 12px;
+      background: rgba(255,255,255,.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+    .tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+    .wrap {
+      padding: 16px 18px 24px;
+      overflow-x: auto;
+    }
+    .board {
+      min-width: max(980px, calc(132px + 10 * 174px));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .room-head {
+      display: grid;
+      grid-template-columns: 132px repeat(10, minmax(160px, 1fr));
+      background: var(--header);
+      border-bottom: 1px solid var(--line);
+      font-weight: 800;
+    }
+    .room-head div {
+      min-height: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      align-items: center;
+      justify-content: center;
+      border-left: 1px solid var(--line);
+      padding: 8px;
+      text-align: center;
+    }
+    .room-head div:first-child { border-left: 0; color: var(--muted); }
+    .capacity {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 132px repeat(10, minmax(160px, 1fr));
+      height: 884.0px;
+      background: repeating-linear-gradient(to bottom, #fff 0, #fff 67px, var(--line) 68px);
+    }
+    .time-col {
+      position: relative;
+      border-right: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+    .time {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 68px;
+      padding-top: 8px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      border-bottom: 1px solid var(--line);
+    }
+    .room-col {
+      position: relative;
+      border-right: 1px solid var(--line);
+    }
+    .event {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      border-radius: 7px;
+      border: 1px solid currentColor;
+      padding: 11px 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(31, 41, 55, .06);
+    }
+    .event strong {
+      display: block;
+      font-size: clamp(16px, 1.05vw, 22px);
+      line-height: 1.38;
+      word-break: keep-all;
+    }
+    .meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 8px;
+      font-size: clamp(14px, .82vw, 18px);
+      line-height: 1.35;
+      color: inherit;
+      opacity: .88;
+    }
+    .badge {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.7);
+      font-weight: 700;
+    }
+    .event.compact {
+      padding: 7px 9px;
+    }
+    .event.compact strong {
+      font-size: clamp(15px, .88vw, 18px);
+      line-height: 1.28;
+    }
+    .event.compact .meta {
+      margin-top: 4px;
+      font-size: clamp(13px, .72vw, 15px);
+      line-height: 1.25;
+    }
+    .empty {
+      padding: 60px 18px;
+      text-align: center;
+      color: var(--muted);
+    }
+    @media print {
+      .topbar { position: static; }
+      .tabs { display: none; }
+      .wrap { padding: 0; overflow: visible; }
+      .board { border-radius: 0; min-width: 0; }
+      button { display: none; }
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>강의실 시간표</h1>
+    <div id="tabs" class="tabs"></div>
+  </div>
+  <div class="wrap">
+    <div class="board">
+      <div id="roomHead" class="room-head"></div>
+      <div id="grid" class="grid"></div>
+    </div>
+  </div>
+  <script>
+    const events = [{"name": "[중3/고1] 공수 1,2 (정수인T)", "room": "A관 10강의실", "day": "월", "kind": "정규", "start": "18:30", "end": "22:00", "startMin": 1110, "endMin": 1320}, {"name": "[중3/고1] 공수 1,2 (정수인T)", "room": "A관 10강의실", "day": "금", "kind": "정규", "start": "18:30", "end": "22:00", "startMin": 1110, "endMin": 1320}, {"name": "[중3/고1] 공수 1,2 (정수인T)", "room": "A관 10강의실", "day": "토", "kind": "클리닉", "start": "10:00", "end": "16:00", "startMin": 600, "endMin": 960}, {"name": "[중3/고1] 대수특강 (우지훈 T)", "room": "A관10강의실", "day": "월", "kind": "정규", "start": "10:00", "end": "13:00", "startMin": 600, "endMin": 780}, {"name": "[중3/고1] 대수특강 (우지훈 T)", "room": "A관10강의실", "day": "수", "kind": "정규", "start": "10:00", "end": "13:00", "startMin": 600, "endMin": 780}, {"name": "[중3/고1] 대수특강 (우지훈 T)", "room": "A관10강의실", "day": "금", "kind": "정규", "start": "10:00", "end": "13:00", "startMin": 600, "endMin": 780}, {"name": "[중3/고1] 대수특강 (우지훈 T)", "room": "A관10강의실", "day": "월", "kind": "클리닉", "start": "14:00", "end": "17:00", "startMin": 840, "endMin": 1020}, {"name": "[중3/고1] 대수특강 (우지훈 T)", "room": "A관10강의실", "day": "수", "kind": "클리닉", "start": "14:00", "end": "17:00", "startMin": 840, "endMin": 1020}, {"name": "[중3/고1] 대수특강 (우지훈 T)", "room": "A관10강의실", "day": "금", "kind": "클리닉", "start": "14:00", "end": "17:00", "startMin": 840, "endMin": 1020}, {"name": "[고1] 유신/창현(공수2) (윤재필T)", "room": "A관 4강의실", "day": "월", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고1] 유신/창현(공수2) (윤재필T)", "room": "A관 4강의실", "day": "금", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고1] 유신/창현(공수2) (윤재필T)", "room": "A관 5강의실", "day": "월", "kind": "클리닉", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고1] 유신/창현(공수2) (윤재필T)", "room": "A관 5강의실", "day": "금", "kind": "클리닉", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T)", "room": "A관 1강의실", "day": "월", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고1]_공수2_박주신", "room": "A관 9강의실", "day": "월", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고1]_공수2_박주신", "room": "A관 9강의실", "day": "금", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2] 유신/창현 A (미적1) (신영준T)", "room": "A관 6강의실", "day": "화", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2] 유신/창현 A (미적1) (신영준T)", "room": "A관 6강의실", "day": "토", "kind": "정규", "start": "09:00", "end": "13:00", "startMin": 540, "endMin": 780}, {"name": "[고2] 광교/이의/수여 A (미적1) (엄형국T)", "room": "A관 4강의실", "day": "목", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2] 광교/이의/수여 A (미적1) (엄형국T)", "room": "A관 4강의실", "day": "토", "kind": "정규", "start": "09:00", "end": "13:00", "startMin": 540, "endMin": 780}, {"name": "[고2] 광교/이의/수여 B (미적1) (엄형국T)", "room": "A관 7강의실", "day": "목", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2] 광교/이의/수여 B (미적1) (엄형국T)", "room": "A관 7강의실", "day": "토", "kind": "정규", "start": "09:00", "end": "13:00", "startMin": 540, "endMin": 780}, {"name": "[고2] 기하 (신영준T)", "room": "A관 6강의실", "day": "토", "kind": "정규", "start": "13:30", "end": "16:30", "startMin": 810, "endMin": 990}, {"name": "[고2] 미적2 (신영준T)", "room": "A관 6강의실", "day": "화", "kind": "정규", "start": "10:00", "end": "13:00", "startMin": 600, "endMin": 780}, {"name": "[고2] 미적2 (신영준T)", "room": "A관 6강의실", "day": "목", "kind": "정규", "start": "10:00", "end": "13:00", "startMin": 600, "endMin": 780}, {"name": "[고2] 미적2 (신영준T)", "room": "A관 6강의실", "day": "화", "kind": "클리닉", "start": "14:00", "end": "17:00", "startMin": 840, "endMin": 1020}, {"name": "[고2] 미적2 (신영준T)", "room": "A관 6강의실", "day": "목", "kind": "클리닉", "start": "14:00", "end": "17:00", "startMin": 840, "endMin": 1020}, {"name": "[고3] S반 (박민수T)", "room": "A관 4강의실", "day": "일", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고3] 수능수1,2 (정수인T)", "room": "A관 1강의실", "day": "토", "kind": "클리닉", "start": "10:30", "end": "12:10", "startMin": 630, "endMin": 730}, {"name": "[고3] 수능수1,2 (정수인T)", "room": "A관 1강의실", "day": "토", "kind": "정규", "start": "13:30", "end": "16:30", "startMin": 810, "endMin": 990}, {"name": "[고3] 미적분 (정수인T)", "room": "A관 4강의실", "day": "수", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[중3]_국어 (엄태욱T)", "room": "A관 10강의실", "day": "수", "kind": "정규", "start": "18:00", "end": "21:00", "startMin": 1080, "endMin": 1260}, {"name": "[고1]_유신/창현1 국어 (전진선T)", "room": "A관 3강의실", "day": "토", "kind": "정규", "start": "13:00", "end": "16:00", "startMin": 780, "endMin": 960}, {"name": "[고1]_이의1 국어 (박소진T)", "room": "A관 10강의실", "day": "일", "kind": "정규", "start": "13:00", "end": "16:00", "startMin": 780, "endMin": 960}, {"name": "[고2]_유신/창현2 국어 (전진선T)", "room": "A관 3강의실", "day": "토", "kind": "정규", "start": "17:00", "end": "20:00", "startMin": 1020, "endMin": 1200}, {"name": "[고2]_이의2 국어 (박소진T)", "room": "A관 10강의실", "day": "일", "kind": "정규", "start": "17:00", "end": "20:00", "startMin": 1020, "endMin": 1200}, {"name": "[중2] 국어 (백강현T)", "room": "A관 10강의실", "day": "토", "kind": "정규", "start": "17:00", "end": "19:00", "startMin": 1020, "endMin": 1140}, {"name": "[고2] 국어 (백강현T)", "room": "A관 8강의실", "day": "일", "kind": "정규", "start": "16:00", "end": "19:00", "startMin": 960, "endMin": 1140}, {"name": "[고3] 국어 (백강현T)", "room": "A관 8강의실", "day": "일", "kind": "정규", "start": "13:00", "end": "16:00", "startMin": 780, "endMin": 960}, {"name": "[중3]_영어 (맥심T)", "room": "A관 10강의실", "day": "화", "kind": "정규", "start": "14:00", "end": "16:00", "startMin": 840, "endMin": 960}, {"name": "[중3]_영어 (맥심T)", "room": "A관 10강의실", "day": "목", "kind": "정규", "start": "14:00", "end": "16:00", "startMin": 840, "endMin": 960}, {"name": "[중3]_영어 (맥심T)", "room": "A관 10강의실", "day": "화", "kind": "정규", "start": "19:00", "end": "21:00", "startMin": 1140, "endMin": 1260}, {"name": "[중3]_영어 (맥심T)", "room": "A관 10강의실", "day": "목", "kind": "정규", "start": "19:00", "end": "21:00", "startMin": 1140, "endMin": 1260}, {"name": "[고1]_올인원 영어 (맥심T)", "room": "A관 10강의실", "day": "화", "kind": "정규", "start": "17:00", "end": "19:00", "startMin": 1020, "endMin": 1140}, {"name": "[고1]_올인원 영어 (맥심T)", "room": "A관 10강의실", "day": "목", "kind": "정규", "start": "17:00", "end": "19:00", "startMin": 1020, "endMin": 1140}, {"name": "[고1]_유신고 영어(서현수T)", "room": "A관 3강의실", "day": "화", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고1]_유신고 영어(서현수T)", "room": "A관 3강의실", "day": "목", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고1]_수원외고 내신영어 (허지원T)", "room": "A관 6강의실", "day": "일", "kind": "정규", "start": "10:00", "end": "13:00", "startMin": 600, "endMin": 780}, {"name": "[고1]_창현고 영어(장현명T)", "room": "A관 3강의실", "day": "수", "kind": "정규", "start": "16:00", "end": "18:00", "startMin": 960, "endMin": 1080}, {"name": "[고1]_창현고 영어(장현명T)", "room": "A관 3강의실", "day": "금", "kind": "정규", "start": "16:00", "end": "18:00", "startMin": 960, "endMin": 1080}, {"name": "[고2]_광교고 영어(장현명T)", "room": "A관 3강의실", "day": "수", "kind": "정규", "start": "18:00", "end": "20:00", "startMin": 1080, "endMin": 1200}, {"name": "[고2]_광교고 영어(장현명T)", "room": "A관 3강의실", "day": "금", "kind": "정규", "start": "18:00", "end": "20:00", "startMin": 1080, "endMin": 1200}, {"name": "[고1]_창현고 영어(장현명T) [고3]_정시대비반 영어(장현명T)", "room": "A관 7강의실", "day": "수", "kind": "클리닉", "start": "18:00", "end": "20:00", "startMin": 1080, "endMin": 1200}, {"name": "[고1]_창현고 영어(장현명T) [고3]_정시대비반 영어(장현명T)", "room": "A관 7강의실", "day": "금", "kind": "클리닉", "start": "18:00", "end": "20:00", "startMin": 1080, "endMin": 1200}, {"name": "[고3]_정시대비반 영어(장현명T)", "room": "A관 3강의실", "day": "수", "kind": "정규", "start": "20:00", "end": "22:00", "startMin": 1200, "endMin": 1320}, {"name": "[고3]_정시대비반 영어(장현명T)", "room": "A관 3강의실", "day": "금", "kind": "정규", "start": "20:00", "end": "22:00", "startMin": 1200, "endMin": 1320}, {"name": "[고2]_유신고 영어(배수안T)", "room": "A관 3강의실", "day": "월", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2]_유신고 영어(배수안T) & 이의고 영어 (맥심T)", "room": "A관 5강의실", "day": "목", "kind": "클리닉", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2]_유신고 영어(배수안T)-1주동안만", "room": "A관 8강의실", "day": "화", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2]_창현고 영어(배수안T)", "room": "A관 6강의실", "day": "수", "kind": "정규", "start": "13:00", "end": "17:00", "startMin": 780, "endMin": 1020}, {"name": "[고2]_창현고 영어(배수안T) & 이의고 영어 (맥심T)", "room": "A관 4강의실", "day": "화", "kind": "클리닉", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2]_창현고 영어(배수안T)-1주동안만", "room": "A관 8강의실", "day": "목", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2]_이의고 영어 (맥심T)", "room": "A관 6강의실", "day": "월", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고3]_수능영어 (맥심T) (+격주모고시험)", "room": "A관 6강의실", "day": "금", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고3]_현민논술- 국어(현민T)", "room": "A관 1강의실", "day": "토", "kind": "정규", "start": "19:00", "end": "22:00", "startMin": 1140, "endMin": 1320}, {"name": "[고3]_현민논술- 수학(현민T)", "room": "A관 1강의실", "day": "일", "kind": "정규", "start": "09:00", "end": "12:00", "startMin": 540, "endMin": 720}, {"name": "[중1]_중등 과학(박선애T)", "room": "A관 8강의실", "day": "토", "kind": "정규", "start": "13:00", "end": "14:30", "startMin": 780, "endMin": 870}, {"name": "[중2]_중등 과학(박선애T)", "room": "A관 8강의실", "day": "토", "kind": "정규", "start": "14:30", "end": "16:00", "startMin": 870, "endMin": 960}, {"name": "[중3]_통합과학 정복(박선애T)", "room": "A관 8강의실", "day": "토", "kind": "정규", "start": "16:30", "end": "19:30", "startMin": 990, "endMin": 1170}, {"name": "[고1]_통합과학II(박선애T)", "room": "A관 8강의실", "day": "토", "kind": "정규", "start": "09:30", "end": "12:30", "startMin": 570, "endMin": 750}, {"name": "<클리닉 연합반> [중3/고1] 공수 1,2 (정수인T) /[고1] 유신(공수2) (윤재필T) /[고1] 연합반(공수2) (우지훈T) [고2]유신고 영어(배수안T)", "room": "A관 1강의실", "day": "수", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[하프썸머]", "room": "A관 1강의실", "day": "월", "kind": "정규", "start": "10:00", "end": "17:00", "startMin": 600, "endMin": 1020}, {"name": "[하프썸머]", "room": "A관 1강의실", "day": "화", "kind": "정규", "start": "10:00", "end": "17:00", "startMin": 600, "endMin": 1020}, {"name": "[하프썸머]", "room": "A관 1강의실", "day": "수", "kind": "정규", "start": "10:00", "end": "17:00", "startMin": 600, "endMin": 1020}, {"name": "[하프썸머]", "room": "A관 1강의실", "day": "목", "kind": "정규", "start": "10:00", "end": "17:00", "startMin": 600, "endMin": 1020}, {"name": "[하프썸머]", "room": "A관 1강의실", "day": "금", "kind": "정규", "start": "10:00", "end": "17:00", "startMin": 600, "endMin": 1020}, {"name": "[고3] 수능수1,2 (정수인T)", "room": "A관 8강의실", "day": "월", "kind": "클리닉", "start": "18:30", "end": "22:00", "startMin": 1110, "endMin": 1320}, {"name": "[고2]_창현고 영어(배수안T)", "room": "A관 7강의실", "day": "월", "kind": "클리닉", "start": "13:00", "end": "17:00", "startMin": 780, "endMin": 1020}, {"name": "[고2] 광교/이의/수여 A (미적1) (엄형국T)", "room": "A관 1강의실", "day": "화", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[중3]_영어 (맥심T)", "room": "A관 9강의실", "day": "화", "kind": "클리닉", "start": "16:00", "end": "17:00", "startMin": 960, "endMin": 1020}, {"name": "[중3]_영어 (맥심T)", "room": "A관 9강의실", "day": "화", "kind": "클리닉", "start": "21:00", "end": "22:00", "startMin": 1260, "endMin": 1320}, {"name": "[고1]_올인원 영어 (맥심T)", "room": "A관 9강의실", "day": "화", "kind": "클리닉", "start": "19:00", "end": "21:00", "startMin": 1140, "endMin": 1260}, {"name": "[고1]_공수2_박주신", "room": "A관 8강의실", "day": "수", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[중3]_국어 (엄태욱T)", "room": "A관 9강의실", "day": "수", "kind": "클리닉", "start": "18:00", "end": "21:00", "startMin": 1080, "endMin": 1260}, {"name": "[고2]_광교고 영어(장현명T)", "room": "A관 7강의실", "day": "수", "kind": "클리닉", "start": "20:00", "end": "22:00", "startMin": 1200, "endMin": 1320}, {"name": "[고2]_유신고 영어(배수안T)", "room": "A관 5강의실", "day": "수", "kind": "클리닉", "start": "13:00", "end": "17:00", "startMin": 780, "endMin": 1020}, {"name": "[고2] 유신/창현 A (미적1) (신영준T)", "room": "A관 1강의실", "day": "목", "kind": "클리닉", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[중3]_영어 (맥심T)", "room": "A관 9강의실", "day": "목", "kind": "클리닉", "start": "16:00", "end": "17:00", "startMin": 960, "endMin": 1020}, {"name": "[중3]_영어 (맥심T)", "room": "A관 9강의실", "day": "목", "kind": "클리닉", "start": "21:00", "end": "22:00", "startMin": 1260, "endMin": 1320}, {"name": "[고1]_올인원 영어 (맥심T)", "room": "A관 9강의실", "day": "목", "kind": "클리닉", "start": "19:00", "end": "21:00", "startMin": 1140, "endMin": 1260}, {"name": "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T)", "room": "A관 1강의실", "day": "금", "kind": "정규", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2]_광교고 영어(장현명T)", "room": "A관 7강의실", "day": "금", "kind": "클리닉", "start": "20:00", "end": "22:00", "startMin": 1200, "endMin": 1320}, {"name": "[고2]_이의고 영어 (맥심T)", "room": "A관 8강의실", "day": "금", "kind": "클리닉", "start": "18:00", "end": "22:00", "startMin": 1080, "endMin": 1320}, {"name": "[고2] 기하 (신영준T)", "room": "A관 6강의실", "day": "토", "kind": "클리닉", "start": "16:30", "end": "17:30", "startMin": 990, "endMin": 1050}, {"name": "[고1]_유신/창현1 국어 (전진선T)", "room": "A관 3강의실", "day": "토", "kind": "클리닉", "start": "16:00", "end": "17:00", "startMin": 960, "endMin": 1020}, {"name": "[고2]_유신/창현2 국어 (전진선T)", "room": "A관 3강의실", "day": "토", "kind": "클리닉", "start": "20:00", "end": "21:00", "startMin": 1200, "endMin": 1260}, {"name": "[중1]_중등 과학(박선애T)", "room": "A관 9강의실", "day": "토", "kind": "클리닉", "start": "14:30", "end": "15:30", "startMin": 870, "endMin": 930}, {"name": "[중2]_중등 과학(박선애T)", "room": "A관 9강의실", "day": "토", "kind": "클리닉", "start": "16:00", "end": "17:00", "startMin": 960, "endMin": 1020}, {"name": "[고1]_이의1 국어 (박소진T)", "room": "A관 10강의실", "day": "일", "kind": "클리닉", "start": "16:00", "end": "17:00", "startMin": 960, "endMin": 1020}];
+    const rooms = ["A관 1강의실", "A관 3강의실", "A관 4강의실", "A관 5강의실", "A관 6강의실", "A관 7강의실", "A관 8강의실", "A관 9강의실", "A관 10강의실", "A관10강의실"];
+    const days = ["월", "화", "수", "목", "금", "토", "일"];
+    const labels = {"월": "월", "화": "화", "수": "수", "목": "목", "금": "금", "토": "토", "일": "일"};
+    const capacities = {"A관 1강의실": 46, "A관 2강의실": 24, "A관 3강의실": 18, "A관 4강의실": 18, "A관 5강의실": 9, "A관 6강의실": 20, "A관 7강의실": 15, "A관 8강의실": 24, "A관 9강의실": 20, "A관 10강의실": 20};
+    const colors = {"[중3/고1] 공수 1,2 (정수인T)": ["#F2F0E8", "#6A6044"], "[중3/고1] 대수특강 (우지훈 T)": ["#E8F3FF", "#2166A5"], "[고1] 유신/창현(공수2) (윤재필T)": ["#F5EAFF", "#6A3FA0"], "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T)": ["#FFF3D8", "#8A5A00"], "[고1]_공수2_박주신": ["#F5EAFF", "#6A3FA0"], "[고2] 유신/창현 A (미적1) (신영준T)": ["#EAF7EF", "#257044"], "[고2] 광교/이의/수여 A (미적1) (엄형국T)": ["#FFF3D8", "#8A5A00"], "[고2] 광교/이의/수여 B (미적1) (엄형국T)": ["#F5EAFF", "#6A3FA0"], "[고2] 기하 (신영준T)": ["#FFECEA", "#A54234"], "[고2] 미적2 (신영준T)": ["#E9F7F7", "#287174"], "[고3] S반 (박민수T)": ["#FFF3D8", "#8A5A00"], "[고3] 수능수1,2 (정수인T)": ["#FFF0F6", "#9B3D6B"], "[고3] 미적분 (정수인T)": ["#EAF7EF", "#257044"], "[중3]_국어 (엄태욱T)": ["#FFF3D8", "#8A5A00"], "[고1]_유신/창현1 국어 (전진선T)": ["#F5EAFF", "#6A3FA0"], "[고1]_이의1 국어 (박소진T)": ["#EAF7EF", "#257044"], "[고2]_유신/창현2 국어 (전진선T)": ["#E9F7F7", "#287174"], "[고2]_이의2 국어 (박소진T)": ["#F5EAFF", "#6A3FA0"], "[중2] 국어 (백강현T)": ["#E9F7F7", "#287174"], "[고2] 국어 (백강현T)": ["#F2F0E8", "#6A6044"], "[고3] 국어 (백강현T)": ["#EEF1FF", "#4D5EA8"], "[중3]_영어 (맥심T)": ["#E9F7F7", "#287174"], "[고1]_올인원 영어 (맥심T)": ["#EEF1FF", "#4D5EA8"], "[고1]_유신고 영어(서현수T)": ["#EAF7EF", "#257044"], "[고1]_수원외고 내신영어 (허지원T)": ["#E9F7F7", "#287174"], "[고1]_창현고 영어(장현명T)": ["#FFECEA", "#A54234"], "[고2]_광교고 영어(장현명T)": ["#EAF7EF", "#257044"], "[고1]_창현고 영어(장현명T) [고3]_정시대비반 영어(장현명T)": ["#E8F3FF", "#2166A5"], "[고3]_정시대비반 영어(장현명T)": ["#E8F3FF", "#2166A5"], "[고2]_유신고 영어(배수안T)": ["#FFF3D8", "#8A5A00"], "[고2]_유신고 영어(배수안T) & 이의고 영어 (맥심T)": ["#F2F0E8", "#6A6044"], "[고2]_유신고 영어(배수안T)-1주동안만": ["#F2F0E8", "#6A6044"], "[고2]_창현고 영어(배수안T)": ["#EAF7EF", "#257044"], "[고2]_창현고 영어(배수안T) & 이의고 영어 (맥심T)": ["#E9F7F7", "#287174"], "[고2]_창현고 영어(배수안T)-1주동안만": ["#E9F7F7", "#287174"], "[고2]_이의고 영어 (맥심T)": ["#E8F3FF", "#2166A5"], "[고3]_수능영어 (맥심T) (+격주모고시험)": ["#FFECEA", "#A54234"], "[고3]_현민논술- 국어(현민T)": ["#E8F3FF", "#2166A5"], "[고3]_현민논술- 수학(현민T)": ["#FFF0F6", "#9B3D6B"], "[중1]_중등 과학(박선애T)": ["#E8F3FF", "#2166A5"], "[중2]_중등 과학(박선애T)": ["#EAF7EF", "#257044"], "[중3]_통합과학 정복(박선애T)": ["#E9F7F7", "#287174"], "[고1]_통합과학II(박선애T)": ["#EAF7EF", "#257044"], "<클리닉 연합반> [중3/고1] 공수 1,2 (정수인T) /[고1] 유신(공수2) (윤재필T) /[고1] 연합반(공수2) (우지훈T) [고2]유신고 영어(배수안T)": ["#FFF3D8", "#8A5A00"], "[하프썸머]": ["#FFF0F6", "#9B3D6B"]};
+    const startMin = 540;
+    const endMin = 1320;
+    const slotHeight = 68;
+    let activeDay = days.find(day => events.some(event => event.day === day)) || "월";
+
+    function fmt(min) {
+      const h = String(Math.floor(min / 60)).padStart(2, "0");
+      const m = String(min % 60).padStart(2, "0");
+      return `${h}:${m}`;
+    }
+
+    function renderTabs() {
+      const tabs = document.getElementById("tabs");
+      tabs.innerHTML = "";
+      days.forEach(day => {
+        const count = events.filter(event => event.day === day).length;
+        const button = document.createElement("button");
+        button.textContent = `${labels[day]} ${count ? "(" + count + ")" : ""}`;
+        button.className = day === activeDay ? "active" : "";
+        button.onclick = () => {
+          activeDay = day;
+          render();
+        };
+        tabs.appendChild(button);
+      });
+    }
+
+    function renderHeader() {
+      const head = document.getElementById("roomHead");
+      head.innerHTML = "<div>시간</div>" + rooms.map(room => {
+        const capacity = capacities[room];
+        return `<div><span>${room}</span>${capacity ? `<span class="capacity">정원 ${capacity}명</span>` : ""}</div>`;
+      }).join("");
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+
+      const timeCol = document.createElement("div");
+      timeCol.className = "time-col";
+      for (let min = startMin; min < endMin; min += 60) {
+        const label = document.createElement("div");
+        label.className = "time";
+        label.style.top = `${((min - startMin) / 60) * slotHeight}px`;
+        label.textContent = fmt(min);
+        timeCol.appendChild(label);
+      }
+      grid.appendChild(timeCol);
+
+      rooms.forEach(room => {
+        const col = document.createElement("div");
+        col.className = "room-col";
+        const roomEvents = events
+          .filter(event => event.day === activeDay && event.room === room)
+          .sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin);
+
+        roomEvents.forEach(event => {
+          const block = document.createElement("div");
+          const [bg, fg] = colors[event.name] || ["#eef2f7", "#344054"];
+          block.className = "event";
+          if (event.endMin - event.startMin < 150) block.classList.add("compact");
+          block.style.top = `${((event.startMin - startMin) / 60) * slotHeight + 5}px`;
+          block.style.height = `${((event.endMin - event.startMin) / 60) * slotHeight - 10}px`;
+          block.style.background = bg;
+          block.style.color = fg;
+          block.innerHTML = `
+            <strong>${event.name}</strong>
+            <div class="meta">
+              <span>${event.start}~${event.end}</span>
+              <span class="badge">${event.kind}</span>
+            </div>
+          `;
+          col.appendChild(block);
+        });
+
+        grid.appendChild(col);
+      });
+
+      if (!events.some(event => event.day === activeDay)) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.style.gridColumn = `2 / span ${Math.max(rooms.length, 1)}`;
+        empty.textContent = "이 요일에는 등록된 수업이 없습니다.";
+        grid.appendChild(empty);
+      }
+    }
+
+    function render() {
+      renderTabs();
+      renderHeader();
+      renderGrid();
+    }
+
+    render();
+  </script>
+</body>
+</html>
