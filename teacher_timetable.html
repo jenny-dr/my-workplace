@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>선생님별 주간 시간표</title>
+  <style>
+    :root { --line:#d6dde8; --head:#f3f6fa; --text:#1f2937; --muted:#667085; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--text); background:#fff; font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif; }
+    header { padding:16px 18px 12px; border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:22px; letter-spacing:0; }
+    .wrap { padding:14px 16px 24px; overflow:auto; }
+    .board { min-width:1480px; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+    .week-head, .teacher-row { display:grid; grid-template-columns:140px repeat(7,minmax(185px,1fr)); }
+    .week-head { position:sticky; top:0; z-index:5; background:var(--head); font-weight:800; text-align:center; }
+    .week-head > div { padding:12px 8px; border-left:1px solid var(--line); }
+    .week-head > div:first-child { border-left:0; }
+    .teacher-row { border-top:1px solid var(--line); align-items:stretch; }
+    .teacher-cell { position:sticky; left:0; z-index:3; min-height:120px; padding:16px 10px; background:#fafbfd; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; border-right:1px solid var(--line); }
+    .teacher-cell strong { font-size:19px; }
+    .teacher-cell span { margin-top:5px; color:var(--muted); font-size:12px; }
+    .day-cell { min-height:120px; padding:6px; border-right:1px solid var(--line); background:#fff; }
+    .day-cell:last-child { border-right:0; }
+    .class-card { margin-bottom:6px; padding:9px 10px; border:1px solid var(--card-fg); border-radius:6px; background:var(--card-bg); color:var(--card-fg); overflow:hidden; }
+    .class-card:last-child { margin-bottom:0; }
+    .class-card.clinic { border-style:dashed; }
+    .time-line { display:flex; justify-content:space-between; gap:6px; align-items:center; font-size:13px; }
+    .time-line span { padding:2px 5px; border-radius:4px; background:rgba(255,255,255,.72); font-size:11px; font-weight:700; white-space:nowrap; }
+    .class-name { margin-top:6px; font-size:14px; font-weight:800; line-height:1.35; word-break:keep-all; }
+    .room { margin-top:5px; font-size:12px; font-weight:700; opacity:.88; }
+    .empty { padding:60px; text-align:center; color:var(--muted); }
+    @page { size:A3 landscape; margin:8mm; }
+    @media print {
+      header { padding:0 0 6mm; border:0; }
+      .wrap { padding:0; overflow:visible; }
+      .board { min-width:0; border-radius:0; }
+      .week-head, .teacher-row { grid-template-columns:85px repeat(7,1fr); }
+      .week-head { position:static; }
+      .teacher-cell { position:static; min-height:70px; padding:5px; }
+      .teacher-cell strong { font-size:11px; }
+      .day-cell { min-height:70px; padding:3px; }
+      .class-card { padding:4px; margin-bottom:3px; break-inside:avoid; }
+      .time-line, .class-name { font-size:8px; }
+      .time-line span, .room { font-size:7px; }
+      body { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+    }
+  </style>
+</head>
+<body>
+  <header><h1>선생님별 주간 시간표</h1></header>
+  <main class="wrap">
+    <div class="board">
+      <div class="week-head"><div>선생님</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div><div>일</div></div>
+      <section class="teacher-row"><div class="teacher-cell"><strong>박민수T</strong><span>주 4시간</span></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#FFECEA;--card-fg:#A33F32">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고3] S반 (박민수T)</div>
+        <div class="room">A관 4강의실</div>
+      </div></div></section><section class="teacher-row"><div class="teacher-cell"><strong>박선애T</strong><span>주 11시간</span></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#EEF1FF;--card-fg:#495AA2">
+        <div class="time-line">
+          <strong>09:30~12:30</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고1]_통합과학II(박선애T)</div>
+        <div class="room">A관 10강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>13:00~14:30</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중1]_중등 과학(박선애T)</div>
+        <div class="room">A관 10강의실</div>
+      </div>
+      <div class="class-card clinic" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>14:30~15:30</strong>
+          <span>클리닉</span>
+        </div>
+        <div class="class-name">[중1]_중등 과학(박선애T)</div>
+        <div class="room">A관 9강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#F3E9FF;--card-fg:#68409A">
+        <div class="time-line">
+          <strong>14:30~16:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중2]_중등 과학(박선애T)</div>
+        <div class="room">A관 10강의실</div>
+      </div>
+      <div class="class-card clinic" style="--card-bg:#F3E9FF;--card-fg:#68409A">
+        <div class="time-line">
+          <strong>16:00~17:00</strong>
+          <span>클리닉</span>
+        </div>
+        <div class="class-name">[중2]_중등 과학(박선애T)</div>
+        <div class="room">A관 9강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>16:30~19:30</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중3]_통합과학 정복(박선애T)</div>
+        <div class="room">A관 10강의실</div>
+      </div></div><div class="day-cell"></div></section><section class="teacher-row"><div class="teacher-cell"><strong>백강현T</strong><span>주 15시간</span></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#FFECEA;--card-fg:#A33F32">
+        <div class="time-line">
+          <strong>10:00~12:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중3] 국어 (백강현T)</div>
+        <div class="room">A관 8강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#F3E9FF;--card-fg:#68409A">
+        <div class="time-line">
+          <strong>17:00~19:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중2] 국어 (백강현T)</div>
+        <div class="room">A관 8강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#EAF7EF;--card-fg:#256B43">
+        <div class="time-line">
+          <strong>19:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고1] 국어 (백강현T)</div>
+        <div class="room">A관 8강의실</div>
+      </div></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#F3E9FF;--card-fg:#68409A">
+        <div class="time-line">
+          <strong>13:00~16:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고3] 국어 (백강현T)</div>
+        <div class="room">A관 8강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>16:00~19:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고2] 국어 (백강현T)</div>
+        <div class="room">A관 8강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#FFECEA;--card-fg:#A33F32">
+        <div class="time-line">
+          <strong>19:00~21:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중3] 국어 (백강현T)</div>
+        <div class="room">A관 8강의실</div>
+      </div></div></section><section class="teacher-row"><div class="teacher-cell"><strong>신영준T</strong><span>주 18시간</span></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card clinic" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>17:00~19:00</strong>
+          <span>클리닉</span>
+        </div>
+        <div class="class-name">[중2/3] 공수2 심화 (신영준T)</div>
+        <div class="room">A관 5강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#FFECEA;--card-fg:#A33F32">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고2] 유신/창현 A (미적1) (신영준T)</div>
+        <div class="room">A관 6강의실</div>
+      </div></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>17:00~19:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중2/3] 공수2 심화 (신영준T)</div>
+        <div class="room">A관 5강의실</div>
+      </div>
+      <div class="class-card clinic" style="--card-bg:#FFECEA;--card-fg:#A33F32">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>클리닉</span>
+        </div>
+        <div class="class-name">[고2] 유신/창현 A (미적1) (신영준T)</div>
+        <div class="room">A관 6강의실</div>
+      </div></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#FFECEA;--card-fg:#A33F32">
+        <div class="time-line">
+          <strong>09:00~13:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고2] 유신/창현 A (미적1) (신영준T)</div>
+        <div class="room">A관 4강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>13:00~15:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중2/3] 공수2 심화 (신영준T)</div>
+        <div class="room">A관 5강의실</div>
+      </div></div><div class="day-cell"></div></section><section class="teacher-row"><div class="teacher-cell"><strong>엄형국T</strong><span>주 24시간</span></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#FFF3D8;--card-fg:#805600">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고2] 광교/이의/수여 A (미적1) (엄형국T)</div>
+        <div class="room">A관 1강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#EAF7EF;--card-fg:#256B43">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고2] 광교/이의/수여 B (미적1) (엄형국T)</div>
+        <div class="room">A관 2강의실</div>
+      </div></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#FFF3D8;--card-fg:#805600">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고2] 광교/이의/수여 A (미적1) (엄형국T)</div>
+        <div class="room">A관 8강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#EAF7EF;--card-fg:#256B43">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고2] 광교/이의/수여 B (미적1) (엄형국T)</div>
+        <div class="room">A관 9강의실</div>
+      </div></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#FFF3D8;--card-fg:#805600">
+        <div class="time-line">
+          <strong>09:00~13:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고2] 광교/이의/수여 A (미적1) (엄형국T)</div>
+        <div class="room">A관 1강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#EAF7EF;--card-fg:#256B43">
+        <div class="time-line">
+          <strong>09:00~13:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고2] 광교/이의/수여 B (미적1) (엄형국T)</div>
+        <div class="room">A관 2강의실</div>
+      </div></div><div class="day-cell"></div></section><section class="teacher-row"><div class="teacher-cell"><strong>윤재필T</strong><span>주 12시간</span></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#FFF3D8;--card-fg:#805600">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고1] 유신/창현/광교/이의/매원 (공수2) (윤재필T)</div>
+        <div class="room">A관 1강의실</div>
+      </div></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card clinic" style="--card-bg:#FFF3D8;--card-fg:#805600">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>클리닉</span>
+        </div>
+        <div class="class-name">[고1] 유신/창현/광교/이의/매원 (공수2) (윤재필T)</div>
+        <div class="room">A관 1강의실</div>
+      </div></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#FFF3D8;--card-fg:#805600">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고1] 유신/창현/광교/이의/매원 (공수2) (윤재필T)</div>
+        <div class="room">A관 1강의실</div>
+      </div></div><div class="day-cell"></div><div class="day-cell"></div></section><section class="teacher-row"><div class="teacher-cell"><strong>정수인T</strong><span>주 19.1667시간</span></div><div class="day-cell">
+      <div class="class-card clinic" style="--card-bg:#EAF7EF;--card-fg:#256B43">
+        <div class="time-line">
+          <strong>18:30~22:00</strong>
+          <span>클리닉</span>
+        </div>
+        <div class="class-name">[고3] 수능 수1,2 (정수인T)</div>
+        <div class="room">A관 8강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>18:30~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중3/고1] 공수 1,2 (정수인T)</div>
+        <div class="room">A관 3강의실</div>
+      </div></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>18:00~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고3] 미적분 (정수인T)</div>
+        <div class="room">A관 3강의실</div>
+      </div></div><div class="day-cell"></div><div class="day-cell">
+      <div class="class-card regular" style="--card-bg:#E8F3FF;--card-fg:#245F98">
+        <div class="time-line">
+          <strong>18:30~22:00</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[중3/고1] 공수 1,2 (정수인T)</div>
+        <div class="room">A관 3강의실</div>
+      </div></div><div class="day-cell">
+      <div class="class-card clinic" style="--card-bg:#EAF7EF;--card-fg:#256B43">
+        <div class="time-line">
+          <strong>10:30~12:10</strong>
+          <span>클리닉</span>
+        </div>
+        <div class="class-name">[고3] 수능 수1,2 (정수인T)</div>
+        <div class="room">A관 6강의실</div>
+      </div>
+      <div class="class-card regular" style="--card-bg:#EAF7EF;--card-fg:#256B43">
+        <div class="time-line">
+          <strong>13:30~16:30</strong>
+          <span>정규</span>
+        </div>
+        <div class="class-name">[고3] 수능 수1,2 (정수인T)</div>
+        <div class="room">A관 6강의실</div>
+      </div></div><div class="day-cell"></div></section>
+    </div>
+  </main>
+</body>
+</html>
