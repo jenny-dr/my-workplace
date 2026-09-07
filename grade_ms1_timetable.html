@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>중1 시간표</title>
+<style>
+  :root { --line:#e3e6ea; --text:#222; --muted:#888; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif; background:#fafbfc; color:var(--text); }
+  header { position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid var(--line); padding:14px 14px 10px; }
+  h1 { margin:0 0 10px; font-size:19px; }
+  .filters { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; }
+  .filter-btn { flex:none; border:1px solid var(--line); background:#f5f6f8; color:#555; border-radius:999px;
+    padding:9px 15px; font-size:14px; font-weight:600; white-space:nowrap; }
+  .filter-btn.active { background:#222; color:#fff; border-color:#222; }
+  .board { padding:12px; display:flex; flex-direction:column; gap:10px; }
+  .day-col { background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .day-head { background:#f5f6f8; font-weight:800; padding:9px 12px; font-size:14px; border-bottom:1px solid var(--line); }
+  .day-body { padding:8px; display:flex; flex-direction:column; gap:8px; }
+  .class-card { border:1px solid var(--fg); background:var(--bg); color:var(--fg); border-radius:8px; padding:10px 12px; }
+  .card-top { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .card-top strong { font-size:15px; line-height:1.35; word-break:keep-all; }
+  .kind { font-size:11px; font-weight:700; background:rgba(255,255,255,.65); padding:2px 7px; border-radius:999px; white-space:nowrap; }
+  .card-meta { margin-top:4px; font-size:13px; opacity:.9; }
+  .card-room { margin-top:2px; font-size:12px; opacity:.8; }
+  .empty { color:var(--muted); font-size:13px; padding:10px 4px; }
+  @media (min-width:760px) {
+    .board { display:grid; grid-template-columns:repeat(7,1fr); align-items:start; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>중1 시간표</h1>
+  <div class="filters"><button class="filter-btn active" data-subject="전체">전체</button><button class="filter-btn" data-subject="과학">과학</button></div>
+</header>
+<main class="board"><div class="day-col"><div class="day-head">월</div><div class="day-body"><div class="empty">수업 없음</div></div></div><div class="day-col"><div class="day-head">화</div><div class="day-body"><div class="empty">수업 없음</div></div></div><div class="day-col"><div class="day-head">수</div><div class="day-body"><div class="empty">수업 없음</div></div></div><div class="day-col"><div class="day-head">목</div><div class="day-body"><div class="empty">수업 없음</div></div></div><div class="day-col"><div class="day-head">금</div><div class="day-body"><div class="empty">수업 없음</div></div></div><div class="day-col"><div class="day-head">토</div><div class="day-body"><div class="class-card" data-subject="과학" style="--bg:#F5EBFF;--fg:#7B3FA0">
+          <div class="card-top"><strong>[중1] 통합과학 정복</strong><span class="kind">정규</span></div>
+          <div class="card-meta">박선애T · 13:00~14:30</div>
+          <div class="card-room">A관 9강의실</div>
+        </div><div class="class-card" data-subject="과학" style="--bg:#F5EBFF;--fg:#7B3FA0">
+          <div class="card-top"><strong>[중1] 통합과학 정복</strong><span class="kind">클리닉</span></div>
+          <div class="card-meta">박선애T · 14:30~15:30</div>
+          <div class="card-room">A관 5강의실</div>
+        </div></div></div><div class="day-col"><div class="day-head">일</div><div class="day-body"><div class="empty">수업 없음</div></div></div></main>
+<script>
+  const buttons = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.class-card');
+  buttons.forEach(b => b.addEventListener('click', () => {
+    buttons.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const subj = b.dataset.subject;
+    cards.forEach(c => {
+      c.style.display = (subj === '전체' || c.dataset.subject === subj) ? '' : 'none';
+    });
+  }));
+</script>
+</body>
+</html>
