@@ -1,0 +1,340 @@
+<title>중간고사 직보 시간표</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 날짜별 세로 타임라인(왼쪽 날짜, 오른쪽 직보 행). 탭으로 선생님별/문자용/확인 필요 전환. */
+:root{
+  --bg:#f3f5f6; --surface:#ffffff; --ink:#17232b; --muted:#5d6b74; --line:#dbe1e5;
+  --accent:#0f5c63; --accent-soft:#dcecee; --accent-ink:#ffffff;
+  --ok:#1f6f46; --ok-bg:#e1f2e8;
+  --warn:#7d5200; --warn-bg:#fbefd2;
+  --bad:#a63a32; --bad-bg:#f7e1de;
+  --past:#8b979e;
+  --font-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11181c; --surface:#182126; --ink:#e6edf0; --muted:#9aa9b1; --line:#2a373e;
+    --accent:#5cc0c9; --accent-soft:#1b3a3e; --accent-ink:#0c1a1d;
+    --ok:#6fd09a; --ok-bg:#18332a; --warn:#f0c565; --warn-bg:#3a2e12;
+    --bad:#f09a92; --bad-bg:#3c2220; --past:#6c7b83; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11181c; --surface:#182126; --ink:#e6edf0; --muted:#9aa9b1; --line:#2a373e;
+  --accent:#5cc0c9; --accent-soft:#1b3a3e; --accent-ink:#0c1a1d;
+  --ok:#6fd09a; --ok-bg:#18332a; --warn:#f0c565; --warn-bg:#3a2e12;
+  --bad:#f09a92; --bad-bg:#3c2220; --past:#6c7b83; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.55;padding-inline:16px}
+.wrap{max-width:980px;margin-inline:auto;padding-block:24px 56px}
+h1{font-size:1.65rem;line-height:1.25;margin:0 0 4px;font-weight:700;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 16px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.82rem;color:var(--muted);margin-bottom:16px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.badge{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;letter-spacing:.01em}
+.b-ok{background:var(--ok-bg);color:var(--ok)}
+.b-warn{background:var(--warn-bg);color:var(--warn)}
+.b-bad{background:var(--bad-bg);color:var(--bad)}
+.b-past{background:var(--line);color:var(--muted)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;flex-wrap:wrap}
+.tabs button{font:inherit;font-weight:600;color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;cursor:pointer;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.tabs button:focus-visible,.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.day{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px 16px;padding:14px 0;border-top:1px solid var(--line)}
+.day:first-child{border-top:0}
+.dlabel{font-weight:700;font-size:1.05rem;line-height:1.2}
+.dlabel small{display:block;font-weight:500;color:var(--muted);font-size:.8rem;margin-top:2px}
+.dlabel .today{display:inline-block;margin-top:6px;font-size:.7rem;background:var(--accent);color:var(--accent-ink);padding:1px 7px;border-radius:999px}
+.day.empty .dlabel{color:var(--muted);font-weight:600}
+.items{display:flex;flex-direction:column;gap:8px;min-width:0}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:4px 14px;align-items:start}
+.row.past{opacity:.62}
+.row.cancel{background:transparent;border-style:dashed}
+.time{font-family:var(--font-mono);font-size:.88rem;font-weight:500;font-variant-numeric:tabular-nums}
+.who{font-weight:600}
+.cls{color:var(--ink)}
+.meta{color:var(--muted);font-size:.85rem;margin-top:2px}
+.note{color:var(--muted);font-size:.82rem;grid-column:2 / -1}
+.exam{font-size:.8rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px;padding:2px 2px 0}
+.exam b{color:var(--ink);font-weight:600}
+.exam span{min-width:0}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.9rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.t{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tname{font-size:1.05rem;font-weight:700;margin:22px 0 8px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.tname:first-child{margin-top:0}
+.tname small{color:var(--muted);font-weight:500;font-size:.8rem}
+.msg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.msg pre{margin:0 0 10px;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;font-family:var(--font-body);font-size:.92rem}
+.msg .head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.copy{font:inherit;font-size:.82rem;font-weight:600;background:var(--accent-soft);color:var(--accent);border:0;border-radius:6px;padding:6px 12px;cursor:pointer}
+.copy.done{background:var(--ok-bg);color:var(--ok)}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.callout{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.callout h3{margin:0 0 8px;font-size:1rem}
+.callout ul{margin:0;padding-left:1.2em}
+.callout li{margin:4px 0}
+.callout.warn{border-color:var(--warn);}
+.foot{color:var(--muted);font-size:.8rem;margin-top:28px}
+@media (max-width:640px){
+  .day{grid-template-columns:minmax(0,1fr)}
+  .dlabel{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .dlabel small{display:inline;margin:0}
+  .dlabel .today{margin:0}
+  .row{grid-template-columns:minmax(0,1fr) auto}
+  .time{grid-column:1 / -1}
+  .note{grid-column:1 / -1}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+  <h1>중간고사 직보 시간표</h1>
+  <p class="sub">10/1(목)~10/17(토) · 대치SNT 광교 · 10/2 기준 · 강의실은 3층 A관 (2강의실은 상담실, 11강의실 없음)</p>
+  <div class="legend">
+    <span><i class="badge b-ok">확정</i> 마스터 파일·회차 문서에 시간이 있음</span>
+    <span><i class="badge b-warn">임시</i> 시간이 없어 16–22로 잡음</span>
+    <span><i class="badge b-bad">확인 필요</i> 방이나 시간 확인 필요</span>
+    <span><i class="badge b-past">지난 일정</i></span>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="보기 방식">
+    <button role="tab" id="tab-date" aria-selected="true" data-tab="date">날짜별</button>
+    <button role="tab" id="tab-teacher" aria-selected="false" data-tab="teacher">선생님별</button>
+    <button role="tab" id="tab-msg" aria-selected="false" data-tab="msg">직보 문자용</button>
+    <button role="tab" id="tab-check" aria-selected="false" data-tab="check">확인 필요</button>
+  </div>
+
+  <section id="p-date" role="tabpanel" aria-labelledby="tab-date"></section>
+  <section id="p-teacher" role="tabpanel" aria-labelledby="tab-teacher" hidden></section>
+  <section id="p-msg" role="tabpanel" aria-labelledby="tab-msg" hidden></section>
+  <section id="p-check" role="tabpanel" aria-labelledby="tab-check" hidden></section>
+
+  <p class="foot">직보는 시험 전날에 잡고, 직보가 있는 날의 정규 수업은 직보가 대신해서 회차를 유지합니다. 인원수는 9월 급여 정산 파일 기준이라 10월 등록 변동은 반영되지 않았습니다. 고3과 중등 반은 넣지 않았습니다. 맥심 중3 브릿지는 직보 없이 원래 시간에 수업합니다.</p>
+</div>
+
+<script>
+var TODAY = '10-02';
+var WD = {'10-01':'목','10-02':'금','10-03':'토','10-04':'일','10-05':'월','10-06':'화','10-07':'수','10-08':'목','10-09':'금','10-10':'토','10-11':'일','10-12':'월','10-13':'화','10-14':'수','10-15':'목','10-16':'금','10-17':'토'};
+var DATES = Object.keys(WD);
+
+/* st: ok 확정 / temp 임시 / check 확인 필요 / past 지난 일정 */
+var JIKBO = [
+ {d:'10-01',t:'윤재필',cls:'유신고1 공수2',time:'13:00–17:00',room:'6강',n:4,st:'past',note:'10/2 정규 대체'},
+ {d:'10-01',t:'박주신',cls:'유신고1 공수2 합반',time:'14:30–16:30',room:'9강',n:null,st:'past'},
+ {d:'10-01',t:'신영준',cls:'유신고2 미적1',time:'18:00–22:00',room:'',n:null,st:'past'},
+ {d:'10-05',t:'배수안',cls:'유신고2 영어',time:'14:00–18:00',room:'7강',n:2,st:'ok'},
+ {d:'10-05',t:'전진선',cls:'유신고1 국어',time:'13:00–17:00',room:'4강',n:11,st:'ok',note:'10/10(토) 정규 대체'},
+ {d:'10-05',t:'맥심',cls:'고3 수능영어 보강',time:'10:00–14:00',room:'3강',n:2,st:'ok',note:'9월 결강분 보강이라 10월 회차에는 영향 없음'},
+ {d:'10-06',t:'서현수',cls:'유신고1 영어',time:'14:00–18:00',room:'3강',n:7,st:'ok',note:'화 18–22 정규 대체'},
+ {d:'10-07',t:'전진선',cls:'유신고2 국어',time:'15:00–19:00',room:'5강',n:1,st:'ok',note:'수 18–21 정규 대체'},
+ {d:'10-10',t:'신영준',cls:'광교고 기하',time:'13:30–17:30',room:'6강',n:4,st:'ok',note:'토 정규 시간과 같음'},
+ {d:'10-11',t:'서현수',cls:'광교고2 영어',time:'16:00–22:00',room:'1강',n:4,st:'temp'},
+ {d:'10-11',t:'배수안',cls:'창현고1 영어',time:'14:00–22:00',room:'4강',n:4,st:'ok',note:'고2와 동시 진행. 4강 정원 18명'},
+ {d:'10-11',t:'배수안',cls:'창현고2 영어',time:'14:00–22:00',room:'7강',n:2,st:'ok',note:'고1과 동시 진행(4강 맞은편). 7강 정원 15명'},
+ {d:'10-12',t:'엄형국',cls:'광교고 미적1 A·B 합반',time:'16:00–22:00',room:'1강',n:12,st:'temp',note:'10/15(목) 정규 대체. 1강 정원 46명'},
+ {d:'10-12',t:'신영준',cls:'창현고2 미적1',time:'18:00–22:00',room:'3강',n:9,st:'ok',note:'창현 학생 기준. 3강 정원 18명'},
+ {d:'10-12',t:'맥심',cls:'이의고1 영어',time:'18:00–22:00',room:'7강',n:4,st:'ok',note:'10/13(화) 정규 대체. 7강 정원 15명'},
+ {d:'10-13',t:'신영준',cls:'창현고2 미적2',time:'18:00–22:00',room:'6강',n:5,st:'ok'},
+ {d:'10-14',t:'우지훈',cls:'이의고 공수2',time:'14:00–22:00',room:'10강',n:15,st:'ok',note:'10강(정원 20명)으로 배정. 클리닉 연합반은 8·9강 원래대로. 10/12(월) 정규 대체'},
+ {d:'10-15',t:'전진선',cls:'창현고1 국어',time:'15:00–19:00',room:'4강',n:4,st:'ok',note:'10/10(토) 정규 대체'}
+];
+
+/* 휴강 / 이동 (회차 제외 또는 직보로 이동) */
+var OFF = [
+ {d:'10-02',t:'윤재필',cls:'유신고1 공수2',txt:'10/1 직보로 이동'},
+ {d:'10-05',t:'윤재필',cls:'고1 공수2 (월)',txt:'휴강 · 중간고사 기간(다른 과목 시험 등)'},
+ {d:'10-09',t:'윤재필',cls:'고1 공수2 (금)',txt:'휴강 · 중간고사 기간(다른 과목 시험 등)'},
+ {d:'10-10',t:'전진선',cls:'유신고1 국어 (토)',txt:'10/5 직보로 이동'},
+ {d:'10-10',t:'전진선',cls:'창현고1 국어 (토)',txt:'10/15 직보로 이동'},
+ {d:'10-12',t:'우지훈',cls:'고1 공수2 (월)',txt:'10/14 직보로 이동 · 1강 비어 있음'},
+ {d:'10-13',t:'엄형국',cls:'광교고 미적1 A·B (화)',txt:'휴강 · 광교고 미적분1 시험일'},
+ {d:'10-13',t:'신영준',cls:'유신/창현 미적1 A·B (화)',txt:'휴강 · 유신 10/1, 창현 10/12 직보로 대체'},
+ {d:'10-13',t:'맥심',cls:'이의고1 영어 (화)',txt:'10/12 직보로 이동 · 중3 브릿지 20–22는 정규 그대로'},
+ {d:'10-15',t:'엄형국',cls:'광교고 미적1 A·B (목)',txt:'10/12 직보로 이동'},
+ {d:'10-15',t:'맥심',cls:'이의고1 영어 (목)',txt:'휴강 · 회차 제외 · 중3 브릿지 20–22는 정규 그대로'},
+ {d:'10-16',t:'우지훈',cls:'고1 공수2 (금)',txt:'휴강 · 수학 시험 모두 끝남'},
+ {d:'10-17',t:'엄형국',cls:'광교고 미적1 A·B (토)',txt:'휴강 · 회차 제외'}
+];
+
+/* 직보 일정을 아직 모르는 선생님 */
+var PENDING = [
+ {t:'박선애',txt:'직보 일정 확인 필요'},
+ {t:'박소진',txt:'직보 일정 확인 필요 (시간 미정)'},
+ {t:'백강현',txt:'직보 일정 확인 필요'}
+];
+
+/* 학교 시험 (1·2학년) */
+var EXAM = {
+ '10-01':[['유신고','통합과학2','지구시스템과학 · 여행지리 · 인공지능 수학']],
+ '10-02':[['유신고','공통수학2','법과 사회 · 세포와 물질대사 · 미적분1']],
+ '10-06':[['유신고','공통국어2','물질과 에너지 · 영어2']],
+ '10-07':[['유신고','한국사2 · 공통영어2','경제 · 역학과 에너지']],
+ '10-08':[['유신고','통합사회2','현대사회와 윤리 · 화법과 언어']],
+ '10-12':[['광교고','공통수학2','기하 · 영어2'],['창현고','공통영어2 · 한국사2','영어2 · 세포와 물질대사 · 동아시아 역사기행']],
+ '10-13':[['광교고','공통국어2','미적분1 · 역학과 에너지'],['창현고','공통수학2','미적분1 · 물질과 에너지 · 한국지리 탐구'],['이의고','통합사회2 · 공통영어2','영어2 · 세포와 물질대사']],
+ '10-14':[['광교고','공통영어2','지구시스템과학 · 세포와 물질대사'],['창현고','통합과학2','미적분2 등 선택과목 · 윤리와 사상 · 지구시스템과학'],['이의고','통합과학2','동아시아 역사 기행 · 물질과 에너지 · 지구시스템 과학']],
+ '10-15':[['광교고','통합과학2 · 통합사회2','물질과 에너지 · 한국지리 탐구'],['창현고','통합사회2','국제 관계의 이해 · 역학과 에너지'],['이의고','한국사2 · 공통수학2','독서와 작문 · 전자기와 양자']],
+ '10-16':[['광교고','한국사2','화법과 언어'],['창현고','공통국어2','화법과 언어 · 경제'],['이의고','공통국어2','한국지리 탐구 · 미적분1']]
+};
+
+var ST = {ok:['b-ok','확정'],temp:['b-warn','임시'],check:['b-bad','확인 필요'],past:['b-past','지난 일정']};
+function md(d){ var p=d.split('-'); return (+p[0])+'/'+(+p[1]); }
+function dl(d){ return md(d)+'('+WD[d]+')'; }
+function badge(st){ return '<span class="badge '+ST[st][0]+'">'+ST[st][1]+'</span>'; }
+function roomTxt(x){ return (x.room?x.room+'의실':'').replace('강의실','강의실').replace('강의실의실','강의실'); }
+function roomLabel(x){ return x.room ? x.room.replace('강','강의실') : '강의실 확인'; }
+function metaLine(x){ var a=[]; a.push(x.room? roomLabel(x) : '원래 강의실'); if(x.n) a.push(x.n+'명'); return a.join(' · '); }
+
+function pendingBanner(){
+  return '<div class="callout warn"><h3>직보 일정 확인 필요</h3><p class="meta" style="margin:0">'+
+    PENDING.map(function(p){return '<b>'+p.t+'T</b>';}).join(' · ')+
+    ' 선생님의 직보 일정은 아직 확인하지 못해 시간표에 넣지 않았습니다. 확인되면 추가합니다.</p></div>';
+}
+function renderDate(){
+  var h=pendingBanner();
+  DATES.forEach(function(d){
+    var js=JIKBO.filter(function(x){return x.d===d;});
+    var off=OFF.filter(function(x){return x.d===d;});
+    var ex=EXAM[d]||[];
+    var weekend=(WD[d]==='토'||WD[d]==='일');
+    h+='<div class="day'+((js.length||off.length||ex.length)?'':' empty')+'" id="d'+d+'">';
+    h+='<div class="dlabel">'+md(d)+'<small>'+WD[d]+'요일</small>'+(d===TODAY?'<span class="today">오늘</span>':'')+'</div>';
+    h+='<div class="items">';
+    if(ex.length){
+      h+='<div class="exam">';
+      ex.forEach(function(e){ h+='<span><b>'+e[0]+' 시험</b> 1학년 '+e[1]+' / 2학년 '+e[2]+'</span>'; });
+      h+='</div>';
+    }
+    js.forEach(function(x){
+      h+='<div class="row'+(x.st==='past'?' past':'')+'">'+
+        '<div class="time">'+x.time+'</div>'+
+        '<div><div><span class="who">'+x.t+'</span> <span class="cls">'+x.cls+'</span></div><div class="meta">'+metaLine(x)+'</div></div>'+
+        '<div>'+badge(x.st)+'</div>'+
+        (x.note?'<div class="note">'+x.note+'</div>':'')+
+      '</div>';
+    });
+    off.forEach(function(x){
+      h+='<div class="row cancel"><div class="time">수업 없음</div>'+
+        '<div><div><span class="who">'+x.t+'</span> <span class="cls">'+x.cls+'</span></div><div class="meta">'+x.txt+'</div></div><div></div></div>';
+    });
+    if(!js.length&&!off.length&&!ex.length){ h+='<div class="meta" style="margin:0">'+(weekend?'직보 없음':'직보·휴강 없음')+'</div>'; }
+    else if(!js.length&&!off.length){ h+='<div class="meta" style="margin:0">직보 없음</div>'; }
+    h+='</div></div>';
+  });
+  document.getElementById('p-date').innerHTML=h;
+}
+
+function renderTeacher(){
+  var names=[]; JIKBO.concat(OFF).forEach(function(x){ if(names.indexOf(x.t)<0) names.push(x.t); });
+  names.sort(function(a,b){return a.localeCompare(b,'ko');});
+  var h='';
+  names.forEach(function(nm){
+    var js=JIKBO.filter(function(x){return x.t===nm;});
+    var off=OFF.filter(function(x){return x.t===nm;});
+    h+='<div class="tname">'+nm+'T <small>직보 '+js.filter(function(x){return x.st!=='past';}).length+'건'+(off.length?' · 수업 없는 날 '+off.length+'일':'')+'</small></div>';
+    h+='<div class="tblwrap"><table><thead><tr><th>날짜</th><th>시간</th><th>반</th><th>강의실</th><th>인원</th><th>상태</th></tr></thead><tbody>';
+    js.forEach(function(x){
+      h+='<tr><td class="t">'+dl(x.d)+'</td><td class="t">'+x.time+'</td><td>'+x.cls+(x.note?'<div class="meta">'+x.note+'</div>':'')+'</td><td>'+(x.room?roomLabel(x):'-')+'</td><td>'+(x.n?x.n+'명':'-')+'</td><td>'+badge(x.st)+'</td></tr>';
+    });
+    off.forEach(function(x){
+      h+='<tr><td class="t">'+dl(x.d)+'</td><td class="t">수업 없음</td><td>'+x.cls+'</td><td colspan="3">'+x.txt+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  });
+  PENDING.forEach(function(p){
+    h+='<div class="tname">'+p.t+'T <small>직보 일정 확인 필요</small></div><div class="callout warn" style="margin:0"><span class="meta">'+p.txt+'. 확인되면 이 칸에 추가합니다.</span></div>';
+  });
+  document.getElementById('p-teacher').innerHTML=h;
+}
+
+function msgText(x){
+  var lines=['[대치SNT] 중간고사 직전보강 안내','','■ 반: '+x.cls+' ('+x.t+'T)','■ 일시: '+dl(x.d)+' '+x.time.replace('–','~'),'■ 강의실: 3층 A관 '+(x.room?x.room.replace('강','강의실'):'(확인 후 안내)')];
+  if(x.note && x.st!=='past' && /정규 대체/.test(x.note)){ lines.push('■ 안내: 해당 요일 정규 수업은 직보로 대체됩니다.'); }
+  return lines.join('\n');
+}
+function renderMsg(){
+  var list=JIKBO.filter(function(x){return x.st!=='past';});
+  var h='<div class="bar"><button class="copy" id="copyAll">전체 복사</button><span class="meta" style="margin:0">학생·학부모 발송 전에 시간과 강의실을 한 번 더 확인하세요. 임시·확인 필요 표시가 붙은 건은 확정 후 보내세요.</span></div>';
+  list.forEach(function(x,i){
+    h+='<div class="msg"><div class="head"><b>'+dl(x.d)+' '+x.t+'T · '+x.cls+'</b>'+badge(x.st)+'</div><pre id="m'+i+'">'+msgText(x)+'</pre><button class="copy" data-copy="m'+i+'">복사</button></div>';
+  });
+  document.getElementById('p-msg').innerHTML=h;
+}
+
+function renderCheck(){
+  var h='';
+  h+='<div class="callout warn"><h3>시간이나 방을 확인할 일정</h3><ul>'+
+   '<li><b>엄형국 10/12(월)</b> 광교고 A·B: 시간이 없어 16–22로 잡았습니다. 1강(정원 46명)에 배정했습니다.</li>'+
+   '<li><b>서현수 10/11(일)</b> 광교고2 영어: 시간이 없어 16–22로 잡았습니다.</li>'+
+   '<li><b>배수안 10/11(일)</b> 창현고 영어: 창현고1(4강)·고2(7강, 맞은편) 모두 14–22시 동시 진행으로 정했습니다.</li>'+
+  '</ul></div>';
+  h+='<div class="callout warn"><h3>직보 일정 확인 필요</h3><ul>'+
+   '<li><b>박선애T</b>: 직보 일정 확인 필요</li>'+
+   '<li><b>박소진T</b>: 직보 일정 확인 필요 (시간 미정)</li>'+
+   '<li><b>백강현T</b>: 직보 일정 확인 필요</li>'+
+  '</ul></div>';
+  h+='<div class="callout"><h3>시간표에서 뺀 것</h3><ul>'+
+   '<li><b>노현석</b> 과학: 직보가 없습니다.</li>'+
+   '<li><b>맥심</b> 중3 브릿지: 직보가 아니라 원래 시간(화·목 20–22)에 수업합니다.</li>'+
+   '<li><b>수원외고</b>: 시험이 끝나서 고려하지 않았습니다.</li>'+
+   '<li><b>박민수</b> 고3 S반, <b>맥심</b> 고2 영어: 수업이 없어졌습니다. 웹 강의실 시간표에는 박민수 일요일 카드가 남아 있어 지워야 합니다.</li>'+
+  '</ul></div>';
+  h+='<div class="callout"><h3>회차에서 빠진 날</h3><ul>'+
+   '<li><b>윤재필</b> 10/5(월)·10/9(금): 중간고사 기간이라 다른 과목 시험 등으로 휴강입니다.</li>'+
+  '</ul></div>';
+  h+='<div class="callout"><h3>10/12(월) 저녁 강의실 사용</h3>'+
+   '<p class="meta" style="margin:0 0 8px">월요일은 정규 수업이 4강(윤재필), 6강(이유진 첨삭), 8강(정수인 클리닉), 9강(박주신), 10강(이유진)에 있어 직보는 1·3·7강에 들어갑니다. 우지훈 수업이 이동해서 1강이 비었고, 엄형국 직보가 1강을 씁니다.</p>'+
+   '<div class="tblwrap"><table><thead><tr><th>강의실</th><th>정원</th><th>직보</th></tr></thead><tbody>'+
+   '<tr><td>1강</td><td>46명</td><td>엄형국 광교고 A·B 16–22 (12명)</td></tr>'+
+   '<tr><td>3강</td><td>18명</td><td>신영준 창현고2 미적1 18–22 (9명)</td></tr>'+
+   '<tr><td>5강</td><td>9명</td><td>비어 있음</td></tr>'+
+   '<tr><td>7강</td><td>15명</td><td>맥심 이의고1 영어 18–22 (4명)</td></tr>'+
+   '</tbody></table></div></div>';
+  h+='<div class="callout"><h3>자료 기준</h3><ul>'+
+   '<li>직보 일정: 행정 마스터 파일 "강사별 직보 일정"</li>'+
+   '<li>시험일: 학교별 시험 일정표(중간고사)</li>'+
+   '<li>회차와 휴강: 2학기 수업 회차 문서의 최신 10월 일정</li>'+
+   '<li>강의실: 최신 강의실별 시간표(웹)와 8~9월 배정</li>'+
+   '<li>인원수: 9월 선생님 급여 정산 파일</li>'+
+  '</ul></div>';
+  document.getElementById('p-check').innerHTML=h;
+}
+
+function copyText(text, btn){
+  var ok=function(){ var old=btn.textContent; btn.textContent='복사됨'; btn.classList.add('done'); setTimeout(function(){btn.textContent=old;btn.classList.remove('done');},1400); };
+  var fallback=function(){
+    var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly','');
+    ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); ok(); }catch(e){ }
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(ok,fallback); } else { fallback(); }
+}
+
+function showTab(name){
+  ['date','teacher','msg','check'].forEach(function(k){
+    document.getElementById('p-'+k).hidden=(k!==name);
+    document.getElementById('tab-'+k).setAttribute('aria-selected', k===name?'true':'false');
+  });
+  try{ history.replaceState(null,'','#'+name); }catch(e){}
+}
+
+renderDate(); renderTeacher(); renderMsg(); renderCheck();
+document.querySelector('.tabs').addEventListener('click',function(e){ var b=e.target.closest('button[data-tab]'); if(b) showTab(b.dataset.tab); });
+document.getElementById('p-msg').addEventListener('click',function(e){
+  var b=e.target.closest('.copy'); if(!b) return;
+  if(b.id==='copyAll'){
+    var all=JIKBO.filter(function(x){return x.st!=='past';}).map(msgText).join('\n\n----------\n\n');
+    copyText(all,b);
+  } else if(b.dataset.copy){
+    copyText(document.getElementById(b.dataset.copy).textContent,b);
+  }
+});
+var h0=(location.hash||'').replace('#',''); if(['date','teacher','msg','check'].indexOf(h0)>=0) showTab(h0);
+</script>

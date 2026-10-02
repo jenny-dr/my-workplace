@@ -1,0 +1,184 @@
+<title>시험기간 시간표</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 날짜 칩 → 강의실 격자(시간 비례) / 선생님별 목록. 직보만 주황 계열로 튀게 */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --fg:#1d2330; --muted:#5d667a; --line:#dfe3ea;
+  --reg-bg:#e6ecf6; --reg-bd:#b4c4e0; --reg-fg:#1f3a6b;
+  --cli-bg:#e3f2ea; --cli-bd:#a9d3bb; --cli-fg:#1d5a39;
+  --mrg-bg:#ece7f6; --mrg-bd:#c5b8e2; --mrg-fg:#43307a;
+  --jb-bg:#ffe7d1; --jb-bd:#f0894a; --jb-fg:#7a2e00; --jb-solid:#d9531e;
+  --chip:#ffffff; --chip-on:#1d2330; --chip-on-fg:#ffffff;
+  --font:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151c; --surface:#1a1f29; --fg:#e8ebf2; --muted:#9aa3b7; --line:#2b3240;
+  --reg-bg:#1e2a42; --reg-bd:#35508a; --reg-fg:#c3d3f2;
+  --cli-bg:#16322433; --cli-bd:#2f6e4d; --cli-fg:#b6e3c9;
+  --mrg-bg:#2a2342; --mrg-bd:#5b4a99; --mrg-fg:#d4c9f5;
+  --jb-bg:#4a2810; --jb-bd:#e0702f; --jb-fg:#ffd7b8; --jb-solid:#f07a3a;
+  --chip:#1a1f29; --chip-on:#e8ebf2; --chip-on-fg:#12151c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151c; --surface:#1a1f29; --fg:#e8ebf2; --muted:#9aa3b7; --line:#2b3240;
+  --reg-bg:#1e2a42; --reg-bd:#35508a; --reg-fg:#c3d3f2;
+  --cli-bg:#16322433; --cli-bd:#2f6e4d; --cli-fg:#b6e3c9;
+  --mrg-bg:#2a2342; --mrg-bd:#5b4a99; --mrg-fg:#d4c9f5;
+  --jb-bg:#4a2810; --jb-bd:#e0702f; --jb-fg:#ffd7b8; --jb-solid:#f07a3a;
+  --chip:#1a1f29; --chip-on:#e8ebf2; --chip-on-fg:#12151c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);padding-inline:16px;padding-block:20px 48px;line-height:1.45}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-size:1.35rem;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:.85rem;margin:2px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1.5px solid;vertical-align:-2px;margin-right:5px}
+.tabs{display:flex;gap:6px}
+.tab,.chip{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px}
+.tab{padding:7px 14px;font-size:.88rem}
+.tab[aria-selected="true"]{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.chip{flex:0 0 auto;min-width:58px;padding:6px 8px;text-align:center;font-size:.8rem;line-height:1.25;position:relative}
+.chip b{display:block;font-size:.95rem;font-variant-numeric:tabular-nums}
+.chip[aria-selected="true"]{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on)}
+.chip.past{opacity:.55}
+.chip .dot{position:absolute;top:4px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--jb-solid)}
+.chip.wk{color:var(--muted)}
+:focus-visible{outline:2px solid var(--jb-solid);outline-offset:2px}
+.dayhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.dayhead h2{font-size:1.1rem;margin:0}
+.exam{font-size:.8rem;color:var(--muted)}
+.exam b{color:var(--jb-solid)}
+.gridbox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.grid{display:grid;grid-template-columns:44px repeat(var(--cols),minmax(104px,1fr));min-width:calc(44px + var(--cols)*104px)}
+.gh{position:sticky;top:0;padding:7px 4px;text-align:center;font-size:.8rem;font-weight:700;border-bottom:1px solid var(--line);background:var(--surface);z-index:2}
+.times{position:relative;height:var(--h)}
+.times span{position:absolute;left:0;right:6px;text-align:right;font-size:.68rem;color:var(--muted);transform:translateY(-6px);font-variant-numeric:tabular-nums}
+.times span:first-child{transform:none}
+.times span:last-child{transform:translateY(-14px)}
+.col{position:relative;height:var(--h);border-left:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--hr) - 1px),var(--line) calc(var(--hr) - 1px),var(--line) var(--hr))}
+.blk{position:absolute;left:3px;right:3px;border:1.5px solid;border-radius:6px;padding:3px 5px;overflow:hidden;font-size:.72rem;line-height:1.25}
+.blk .nm{font-weight:700;display:block}
+.blk .tm{opacity:.85;font-variant-numeric:tabular-nums;display:block}
+.blk .tg{display:inline-block;font-size:.62rem;font-weight:700;padding:0 4px;border-radius:3px;margin-right:3px}
+.k-정규,.k-정규\+클리닉{background:var(--reg-bg);border-color:var(--reg-bd);color:var(--reg-fg)}
+.k-클리닉{background:var(--cli-bg);border-color:var(--cli-bd);color:var(--cli-fg)}
+.k-합반,.k-클리닉\ 합반{background:var(--mrg-bg);border-color:var(--mrg-bd);color:var(--mrg-fg)}
+.k-직보{background:var(--jb-bg);border-color:var(--jb-bd);color:var(--jb-fg);border-width:2px}
+.tg-직보{background:var(--jb-solid);color:#fff}
+.tg-o{background:rgba(127,127,127,.2)}
+.noroom{display:flex;flex-wrap:wrap;gap:6px;font-size:.8rem;color:var(--muted)}
+.empty{padding:28px 12px;text-align:center;color:var(--muted)}
+.tlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.tcard h3{margin:0;font-size:.95rem}
+.row{display:flex;flex-direction:column;gap:1px;padding-left:9px;border-left:4px solid;border-radius:2px;min-width:0}
+.row .a{font-size:.84rem;font-weight:500;overflow-wrap:anywhere}
+.row .b{font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.row.k-정규,.row.k-정규\+클리닉,.row.k-클리닉,.row.k-합반,.row.k-클리닉\ 합반,.row.k-직보{background:none;color:var(--fg)}
+.row.k-정규,.row.k-정규\+클리닉{border-color:var(--reg-bd)}
+.row.k-클리닉{border-color:var(--cli-bd)}
+.row.k-합반,.row.k-클리닉\ 합반{border-color:var(--mrg-bd)}
+.row.k-직보{border-color:var(--jb-solid)}
+.note{font-size:.76rem;color:var(--jb-solid)}
+.foot{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+</style>
+<div class="wrap">
+  <div>
+    <h1>시험기간 시간표 · 10/1–10/17</h1>
+    <p class="sub">대치SNT 광교 A관. 직보를 넣었고, 수업이 있는 시간만 표시합니다.</p>
+  </div>
+  <div class="legend" aria-label="범례">
+    <span><i style="background:var(--reg-bg);border-color:var(--reg-bd)"></i>정규</span>
+    <span><i style="background:var(--cli-bg);border-color:var(--cli-bd)"></i>클리닉</span>
+    <span><i style="background:var(--mrg-bg);border-color:var(--mrg-bd)"></i>합반</span>
+    <span><i style="background:var(--jb-bg);border-color:var(--jb-solid)"></i>직보</span>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-room" aria-selected="true">강의실별</button>
+    <button class="tab" role="tab" id="t-teacher" aria-selected="false">선생님별</button>
+  </div>
+  <div class="chips" id="chips" role="tablist" aria-label="날짜"></div>
+  <div class="dayhead"><h2 id="dh"></h2><span class="exam" id="ex"></span></div>
+  <div id="view"></div>
+</div>
+<script>
+var DATA={"WD": {"10-01": "목", "10-02": "금", "10-03": "토", "10-04": "일", "10-05": "월", "10-06": "화", "10-07": "수", "10-08": "목", "10-09": "금", "10-10": "토", "10-11": "일", "10-12": "월", "10-13": "화", "10-14": "수", "10-15": "목", "10-16": "금", "10-17": "토"}, "days": {"10-01": [{"n": "[고2] 광교/이의/수여 A (미적1) (엄형국T) / [고2] 광교/이의/수여 B (미적1) (엄형국T)", "t": ["엄형국", "엄형국"], "r": "4", "s": "18:00", "e": "22:00", "k": "합반"}, {"n": "[고2] 유신/창현 A (미적1) (신영준T) / [고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준", "신영준"], "r": "9", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[고2] 미적2 (신영준T)", "t": ["신영준"], "r": "10", "s": "18:00", "e": "22:00", "k": "정규+클리닉"}, {"n": "[중3] 브릿지 영어 (맥심T) / [고1] 이의고 영어 (맥심T) / [고2] 창현고 영어 (배수안T)", "t": ["맥심", "맥심", "배수안"], "r": "8", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[중3] 브릿지 영어 (맥심T)", "t": ["맥심"], "r": "1", "s": "20:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 이의고 영어 (맥심T)", "t": ["맥심"], "r": "1", "s": "18:00", "e": "20:00", "k": "정규"}, {"n": "[고2] 유신고 영어 (배수안T)", "t": ["배수안"], "r": "7", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 유신고 영어 (서현수T)", "t": ["서현수"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 외대부고 대비반 (허지원T)", "t": ["허지원"], "r": "6", "s": "19:00", "e": "22:00", "k": "정규"}, {"n": "유신고1 공수2", "t": ["윤재필"], "r": "6", "s": "13:00", "e": "17:00", "k": "직보", "c": 4, "st": "past", "note": "10/2(금) 정규 대체"}, {"n": "유신고1 공수2 합반", "t": ["박주신"], "r": "9", "s": "14:30", "e": "16:30", "k": "직보", "c": null, "st": "past", "note": ""}, {"n": "유신고2 미적1", "t": ["신영준"], "r": "", "s": "18:00", "e": "22:00", "k": "직보", "c": null, "st": "past", "note": ""}], "10-02": [{"n": "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T)", "t": ["우지훈"], "r": "1", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 공수2 합반 (박주신T)", "t": ["박주신"], "r": "9", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 공수 1·2 (이유진T)", "t": ["이유진"], "r": "10", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고3] 수능영어 (+격주모고시험) (맥심T)", "t": ["맥심"], "r": "6", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] S반_미적분 (이유진T)", "t": ["이유진"], "r": "8", "s": "17:00", "e": "18:30", "k": "클리닉"}, {"n": "[고1] 창현고 영어 (배수안T) / [고1] 유신고 영어(수금) (서현수T)", "t": ["배수안", "서현수"], "r": "7", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[고2] 광교고 영어 (서현수T)", "t": ["서현수"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규"}], "10-03": [{"n": "[고2] 광교/이의/수여 A (미적1) (엄형국T)", "t": ["엄형국"], "r": "4", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[고2] 광교/이의/수여 B (미적1) (엄형국T)", "t": ["엄형국"], "r": "5", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[고2] 유신/창현 A (미적1) (신영준T)", "t": ["신영준"], "r": "6", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[고2] 유신/창현 A (미적1) (신영준T) / [고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준", "신영준"], "r": "7", "s": "13:30", "e": "16:30", "k": "클리닉 합반"}, {"n": "[고2] 기하 (신영준T)", "t": ["신영준"], "r": "6", "s": "13:30", "e": "17:30", "k": "정규+클리닉"}, {"n": "[중3] 공수 1·2 (이유진T)", "t": ["이유진"], "r": "10", "s": "10:00", "e": "14:00", "k": "클리닉"}, {"n": "[고3] 수능수1,2 (정수인T)", "t": ["정수인"], "r": "1", "s": "10:30", "e": "12:10", "k": "클리닉"}, {"n": "[고3] 수능수1,2 (정수인T)", "t": ["정수인"], "r": "1", "s": "13:30", "e": "16:30", "k": "정규"}, {"n": "[고1] 유신 국어 (전진선T)", "t": ["전진선"], "r": "3", "s": "13:00", "e": "17:00", "k": "정규+클리닉"}, {"n": "[중1] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "8", "s": "13:00", "e": "14:30", "k": "정규"}, {"n": "[중1] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "5", "s": "14:30", "e": "15:30", "k": "클리닉"}, {"n": "[중2] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "8", "s": "14:30", "e": "16:00", "k": "정규"}, {"n": "[중2] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "5", "s": "16:00", "e": "17:00", "k": "클리닉"}, {"n": "[중3] 통합과학 정복 (노현석T)", "t": ["노현석"], "r": "9", "s": "16:30", "e": "19:30", "k": "정규"}, {"n": "[고1] 통합과학II (노현석T)", "t": ["노현석"], "r": "9", "s": "09:30", "e": "12:30", "k": "정규"}, {"n": "[고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준"], "r": "7", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[중3] S반_미적분 (이유진T)", "t": ["이유진"], "r": "10", "s": "14:00", "e": "18:00", "k": "정규"}, {"n": "[고1] 창현 국어 (전진선T)", "t": ["전진선"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규+클리닉"}, {"n": "[중3] 국어B (백강현T)", "t": ["백강현"], "r": "4", "s": "20:00", "e": "22:00", "k": "정규"}, {"n": "[녹지원]마스터반 영어 (폴&벤자민T)", "t": ["폴&벤자민"], "r": "8", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[중2]광교중_국어 (백강현T)", "t": ["백강현"], "r": "4", "s": "17:00", "e": "19:00", "k": "정규"}, {"n": "[중2]연무중_국어 (백강현T)", "t": ["백강현"], "r": "7", "s": "17:00", "e": "19:00", "k": "정규"}, {"n": "[고2] 역학과 에너지 II (노현석T)", "t": ["노현석"], "r": "9", "s": "13:00", "e": "16:00", "k": "정규"}], "10-04": [{"n": "[고1] 광교/이의/수원여 국어 (박소진T)", "t": ["박소진"], "r": "10", "s": "13:00", "e": "17:00", "k": "정규+클리닉"}, {"n": "[고2] 광교/이의/수원여 국어 (박소진T)", "t": ["박소진"], "r": "10", "s": "17:00", "e": "21:00", "k": "정규+클리닉"}, {"n": "[고2] 국어 (백강현T)", "t": ["백강현"], "r": "8", "s": "16:00", "e": "19:00", "k": "정규"}, {"n": "[고3] 국어 (백강현T)", "t": ["백강현"], "r": "8", "s": "13:00", "e": "16:00", "k": "정규"}, {"n": "[고1] 수원외고 내신영어 (허지원T)", "t": ["허지원"], "r": "3", "s": "10:00", "e": "14:00", "k": "정규"}, {"n": "[중3] 외대부고 대비반 (허지원T)", "t": ["허지원"], "r": "6", "s": "10:00", "e": "13:00", "k": "클리닉"}], "10-05": [{"n": "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T)", "t": ["우지훈"], "r": "1", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 공수2 합반 (박주신T)", "t": ["박주신"], "r": "9", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 공수 1·2 (이유진T)", "t": ["이유진"], "r": "10", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고3] 수능수1,2 (정수인T)", "t": ["정수인"], "r": "8", "s": "18:30", "e": "22:00", "k": "클리닉"}, {"n": "[중3] S반_미적분 (이유진T)", "t": ["이유진"], "r": "6", "s": "17:00", "e": "18:30", "k": "클리닉"}, {"n": "유신고2 영어", "t": ["배수안"], "r": "7", "s": "14:00", "e": "18:00", "k": "직보", "c": 2, "st": "ok", "note": "10/8(목) 정규 대체"}, {"n": "유신고1 국어", "t": ["전진선"], "r": "4", "s": "13:00", "e": "17:00", "k": "직보", "c": 11, "st": "ok", "note": "10/10(토) 정규 대체"}, {"n": "고3 수능영어 보강", "t": ["맥심"], "r": "3", "s": "10:00", "e": "14:00", "k": "직보", "c": 2, "st": "ok", "note": "9월 결강 보강"}], "10-06": [{"n": "[고2] 광교/이의/수여 A (미적1) (엄형국T)", "t": ["엄형국"], "r": "10", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고2] 광교/이의/수여 B (미적1) (엄형국T)", "t": ["엄형국"], "r": "9", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고2] 유신/창현 A (미적1) (신영준T)", "t": ["신영준"], "r": "6", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 브릿지 영어 (맥심T) / [고1] 이의고 영어 (맥심T) / [고2] 유신고 영어 (배수안T)", "t": ["맥심", "맥심", "배수안"], "r": "8", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[중3] 브릿지 영어 (맥심T)", "t": ["맥심"], "r": "1", "s": "20:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 이의고 영어 (맥심T)", "t": ["맥심"], "r": "1", "s": "18:00", "e": "20:00", "k": "정규"}, {"n": "[고2] 창현고 영어 (배수안T)", "t": ["배수안"], "r": "7", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준"], "r": "4", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "유신고1 영어", "t": ["서현수"], "r": "3", "s": "14:00", "e": "18:00", "k": "직보", "c": 7, "st": "ok", "note": "화 18–22 정규 대체"}], "10-07": [{"n": "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T) / [고1] 유신/창현 (공수2) (윤재필T) / [고1] 공수2 합반 (박주신T)", "t": ["우지훈", "윤재필", "박주신"], "r": "8", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T) / [고1] 유신/창현 (공수2) (윤재필T) / [고1] 공수2 합반 (박주신T)", "t": ["우지훈", "윤재필", "박주신"], "r": "9", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[고3] 미적분 (정수인T)", "t": ["정수인"], "r": "4", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 국어 (엄태욱T)", "t": ["엄태욱"], "r": "1", "s": "18:00", "e": "21:00", "k": "정규"}, {"n": "[중3] 국어 (엄태욱T)", "t": ["엄태욱"], "r": "7", "s": "18:00", "e": "21:00", "k": "클리닉"}, {"n": "[고1] 창현고 영어 (배수안T)", "t": ["배수안"], "r": "10", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 유신고 영어(수금) (서현수T)", "t": ["서현수"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고2] 광교고 영어 (서현수T)", "t": ["서현수"], "r": "6", "s": "18:00", "e": "22:00", "k": "클리닉"}, {"n": "유신고2 국어", "t": ["전진선"], "r": "5", "s": "15:00", "e": "19:00", "k": "직보", "c": 1, "st": "ok", "note": "수 18–22 정규 대체"}], "10-08": [{"n": "[고2] 광교/이의/수여 A (미적1) (엄형국T) / [고2] 광교/이의/수여 B (미적1) (엄형국T)", "t": ["엄형국", "엄형국"], "r": "4", "s": "18:00", "e": "22:00", "k": "합반"}, {"n": "[고2] 유신/창현 A (미적1) (신영준T) / [고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준", "신영준"], "r": "9", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[고2] 미적2 (신영준T)", "t": ["신영준"], "r": "10", "s": "18:00", "e": "22:00", "k": "정규+클리닉"}, {"n": "[중3] 브릿지 영어 (맥심T) / [고1] 이의고 영어 (맥심T) / [고2] 창현고 영어 (배수안T)", "t": ["맥심", "맥심", "배수안"], "r": "8", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[중3] 브릿지 영어 (맥심T)", "t": ["맥심"], "r": "1", "s": "20:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 이의고 영어 (맥심T)", "t": ["맥심"], "r": "1", "s": "18:00", "e": "20:00", "k": "정규"}, {"n": "[고1] 유신고 영어 (서현수T)", "t": ["서현수"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 외대부고 대비반 (허지원T)", "t": ["허지원"], "r": "6", "s": "19:00", "e": "22:00", "k": "정규"}], "10-09": [{"n": "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T)", "t": ["우지훈"], "r": "1", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 공수2 합반 (박주신T)", "t": ["박주신"], "r": "9", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 공수 1·2 (이유진T)", "t": ["이유진"], "r": "10", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고3] 수능영어 (+격주모고시험) (맥심T)", "t": ["맥심"], "r": "6", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] S반_미적분 (이유진T)", "t": ["이유진"], "r": "8", "s": "17:00", "e": "18:30", "k": "클리닉"}, {"n": "[고1] 창현고 영어 (배수안T) / [고1] 유신고 영어(수금) (서현수T)", "t": ["배수안", "서현수"], "r": "7", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[고2] 광교고 영어 (서현수T)", "t": ["서현수"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규"}], "10-10": [{"n": "[고2] 광교/이의/수여 A (미적1) (엄형국T)", "t": ["엄형국"], "r": "4", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[고2] 광교/이의/수여 B (미적1) (엄형국T)", "t": ["엄형국"], "r": "5", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[고2] 유신/창현 A (미적1) (신영준T)", "t": ["신영준"], "r": "6", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[고2] 유신/창현 A (미적1) (신영준T) / [고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준", "신영준"], "r": "7", "s": "13:30", "e": "16:30", "k": "클리닉 합반"}, {"n": "[중3] 공수 1·2 (이유진T)", "t": ["이유진"], "r": "10", "s": "10:00", "e": "14:00", "k": "클리닉"}, {"n": "[고3] 수능수1,2 (정수인T)", "t": ["정수인"], "r": "1", "s": "10:30", "e": "12:10", "k": "클리닉"}, {"n": "[고3] 수능수1,2 (정수인T)", "t": ["정수인"], "r": "1", "s": "13:30", "e": "16:30", "k": "정규"}, {"n": "[중1] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "8", "s": "13:00", "e": "14:30", "k": "정규"}, {"n": "[중1] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "5", "s": "14:30", "e": "15:30", "k": "클리닉"}, {"n": "[중2] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "8", "s": "14:30", "e": "16:00", "k": "정규"}, {"n": "[중2] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "5", "s": "16:00", "e": "17:00", "k": "클리닉"}, {"n": "[중3] 통합과학 정복 (노현석T)", "t": ["노현석"], "r": "9", "s": "16:30", "e": "19:30", "k": "정규"}, {"n": "[고1] 통합과학II (노현석T)", "t": ["노현석"], "r": "9", "s": "09:30", "e": "12:30", "k": "정규"}, {"n": "[고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준"], "r": "7", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[중3] S반_미적분 (이유진T)", "t": ["이유진"], "r": "10", "s": "14:00", "e": "18:00", "k": "정규"}, {"n": "[중3] 국어B (백강현T)", "t": ["백강현"], "r": "4", "s": "20:00", "e": "22:00", "k": "정규"}, {"n": "[녹지원]마스터반 영어 (폴&벤자민T)", "t": ["폴&벤자민"], "r": "8", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[중2]광교중_국어 (백강현T)", "t": ["백강현"], "r": "4", "s": "17:00", "e": "19:00", "k": "정규"}, {"n": "[중2]연무중_국어 (백강현T)", "t": ["백강현"], "r": "7", "s": "17:00", "e": "19:00", "k": "정규"}, {"n": "[고2] 역학과 에너지 II (노현석T)", "t": ["노현석"], "r": "9", "s": "13:00", "e": "16:00", "k": "정규"}, {"n": "광교고 기하", "t": ["신영준"], "r": "6", "s": "13:30", "e": "17:30", "k": "직보", "c": 4, "st": "ok", "note": "토 정규 시간과 같음"}], "10-11": [{"n": "[고1] 광교/이의/수원여 국어 (박소진T)", "t": ["박소진"], "r": "10", "s": "13:00", "e": "17:00", "k": "정규+클리닉"}, {"n": "[고2] 광교/이의/수원여 국어 (박소진T)", "t": ["박소진"], "r": "10", "s": "17:00", "e": "21:00", "k": "정규+클리닉"}, {"n": "[고2] 국어 (백강현T)", "t": ["백강현"], "r": "8", "s": "16:00", "e": "19:00", "k": "정규"}, {"n": "[고3] 국어 (백강현T)", "t": ["백강현"], "r": "8", "s": "13:00", "e": "16:00", "k": "정규"}, {"n": "[고1] 수원외고 내신영어 (허지원T)", "t": ["허지원"], "r": "3", "s": "10:00", "e": "14:00", "k": "정규"}, {"n": "[중3] 외대부고 대비반 (허지원T)", "t": ["허지원"], "r": "6", "s": "10:00", "e": "13:00", "k": "클리닉"}, {"n": "광교고2 영어", "t": ["서현수"], "r": "1", "s": "16:00", "e": "22:00", "k": "직보", "c": 4, "st": "temp", "note": "10/14(수) 클리닉 대체 · 시간 임시"}, {"n": "창현고1 영어", "t": ["배수안"], "r": "4", "s": "14:00", "e": "22:00", "k": "직보", "c": 4, "st": "ok", "note": "10/14(수) 정규 대체"}, {"n": "창현고2 영어", "t": ["배수안"], "r": "7", "s": "14:00", "e": "22:00", "k": "직보", "c": 2, "st": "ok", "note": "10/13(화) 정규 대체"}], "10-12": [{"n": "[고1] 유신/창현 (공수2) (윤재필T)", "t": ["윤재필"], "r": "4", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 공수2 합반 (박주신T)", "t": ["박주신"], "r": "9", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 공수 1·2 (이유진T)", "t": ["이유진"], "r": "10", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고3] 수능수1,2 (정수인T)", "t": ["정수인"], "r": "8", "s": "18:30", "e": "22:00", "k": "클리닉"}, {"n": "[중3] S반_미적분 (이유진T)", "t": ["이유진"], "r": "6", "s": "17:00", "e": "18:30", "k": "클리닉"}, {"n": "광교고 미적1 A·B 합반", "t": ["엄형국"], "r": "1", "s": "16:00", "e": "22:00", "k": "직보", "c": 12, "st": "temp", "note": "10/15(목) 정규 대체 · 시간 임시"}, {"n": "창현고2 미적1", "t": ["신영준"], "r": "3", "s": "18:00", "e": "22:00", "k": "직보", "c": 9, "st": "ok", "note": "10/13(화) 정규 대체"}, {"n": "이의고1 영어", "t": ["맥심"], "r": "7", "s": "18:00", "e": "22:00", "k": "직보", "c": 4, "st": "ok", "note": "10/13(화) 정규 대체"}], "10-13": [{"n": "[중3] 브릿지 영어 (맥심T) / [고1] 이의고 영어 (맥심T) / [고2] 유신고 영어 (배수안T)", "t": ["맥심", "맥심", "배수안"], "r": "8", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[중3] 브릿지 영어 (맥심T)", "t": ["맥심"], "r": "1", "s": "20:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 유신고 영어 (서현수T)", "t": ["서현수"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "창현고2 미적2", "t": ["신영준"], "r": "6", "s": "18:00", "e": "22:00", "k": "직보", "c": 5, "st": "ok", "note": "10/15(목) 정규 대체"}], "10-14": [{"n": "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T) / [고1] 유신/창현 (공수2) (윤재필T) / [고1] 공수2 합반 (박주신T)", "t": ["우지훈", "윤재필", "박주신"], "r": "8", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[고1] 광교/이의/매원/창현/수여 (공수2) (우지훈T) / [고1] 유신/창현 (공수2) (윤재필T) / [고1] 공수2 합반 (박주신T)", "t": ["우지훈", "윤재필", "박주신"], "r": "9", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[고3] 미적분 (정수인T)", "t": ["정수인"], "r": "4", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 국어 (엄태욱T)", "t": ["엄태욱"], "r": "1", "s": "18:00", "e": "21:00", "k": "정규"}, {"n": "[중3] 국어 (엄태욱T)", "t": ["엄태욱"], "r": "7", "s": "18:00", "e": "21:00", "k": "클리닉"}, {"n": "[고2] 유신 국어 (전진선T)", "t": ["전진선"], "r": "5", "s": "18:00", "e": "22:00", "k": "정규+클리닉"}, {"n": "[고1] 유신고 영어(수금) (서현수T)", "t": ["서현수"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "이의고 공수2", "t": ["우지훈"], "r": "10", "s": "14:00", "e": "22:00", "k": "직보", "c": 15, "st": "ok", "note": "10/12(월) 정규 대체"}], "10-15": [{"n": "[고2] 유신/창현 A (미적1) (신영준T) / [고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준", "신영준"], "r": "9", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[중3] 브릿지 영어 (맥심T) / [고1] 이의고 영어 (맥심T) / [고2] 창현고 영어 (배수안T)", "t": ["맥심", "맥심", "배수안"], "r": "8", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[중3] 브릿지 영어 (맥심T)", "t": ["맥심"], "r": "1", "s": "20:00", "e": "22:00", "k": "정규"}, {"n": "[고2] 유신고 영어 (배수안T)", "t": ["배수안"], "r": "7", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 유신고 영어 (서현수T)", "t": ["서현수"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 외대부고 대비반 (허지원T)", "t": ["허지원"], "r": "6", "s": "19:00", "e": "22:00", "k": "정규"}, {"n": "창현고1 국어", "t": ["전진선"], "r": "4", "s": "15:00", "e": "19:00", "k": "직보", "c": 4, "st": "ok", "note": "10/10(토) 정규 대체"}], "10-16": [{"n": "[고1] 유신/창현 (공수2) (윤재필T)", "t": ["윤재필"], "r": "4", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고1] 공수2 합반 (박주신T)", "t": ["박주신"], "r": "9", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] 공수 1·2 (이유진T)", "t": ["이유진"], "r": "10", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[고3] 수능영어 (+격주모고시험) (맥심T)", "t": ["맥심"], "r": "6", "s": "18:00", "e": "22:00", "k": "정규"}, {"n": "[중3] S반_미적분 (이유진T)", "t": ["이유진"], "r": "8", "s": "17:00", "e": "18:30", "k": "클리닉"}, {"n": "[고1] 창현고 영어 (배수안T) / [고1] 유신고 영어(수금) (서현수T)", "t": ["배수안", "서현수"], "r": "7", "s": "18:00", "e": "22:00", "k": "클리닉 합반"}, {"n": "[고2] 광교고 영어 (서현수T)", "t": ["서현수"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규"}], "10-17": [{"n": "[고2] 유신/창현 A (미적1) (신영준T)", "t": ["신영준"], "r": "6", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[고2] 유신/창현 A (미적1) (신영준T) / [고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준", "신영준"], "r": "7", "s": "13:30", "e": "16:30", "k": "클리닉 합반"}, {"n": "[고2] 기하 (신영준T)", "t": ["신영준"], "r": "6", "s": "13:30", "e": "17:30", "k": "정규+클리닉"}, {"n": "[중3] 공수 1·2 (이유진T)", "t": ["이유진"], "r": "10", "s": "10:00", "e": "14:00", "k": "클리닉"}, {"n": "[고3] 수능수1,2 (정수인T)", "t": ["정수인"], "r": "1", "s": "10:30", "e": "12:10", "k": "클리닉"}, {"n": "[고3] 수능수1,2 (정수인T)", "t": ["정수인"], "r": "1", "s": "13:30", "e": "16:30", "k": "정규"}, {"n": "[고1] 유신 국어 (전진선T)", "t": ["전진선"], "r": "3", "s": "13:00", "e": "17:00", "k": "정규+클리닉"}, {"n": "[중1] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "8", "s": "13:00", "e": "14:30", "k": "정규"}, {"n": "[중1] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "5", "s": "14:30", "e": "15:30", "k": "클리닉"}, {"n": "[중2] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "8", "s": "14:30", "e": "16:00", "k": "정규"}, {"n": "[중2] 통합과학 정복 (박선애T)", "t": ["박선애"], "r": "5", "s": "16:00", "e": "17:00", "k": "클리닉"}, {"n": "[중3] 통합과학 정복 (노현석T)", "t": ["노현석"], "r": "9", "s": "16:30", "e": "19:30", "k": "정규"}, {"n": "[고1] 통합과학II (노현석T)", "t": ["노현석"], "r": "9", "s": "09:30", "e": "12:30", "k": "정규"}, {"n": "[고2] 유신/창현 B (미적1) (신영준T)", "t": ["신영준"], "r": "7", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[중3] S반_미적분 (이유진T)", "t": ["이유진"], "r": "10", "s": "14:00", "e": "18:00", "k": "정규"}, {"n": "[고1] 창현 국어 (전진선T)", "t": ["전진선"], "r": "3", "s": "18:00", "e": "22:00", "k": "정규+클리닉"}, {"n": "[중3] 국어B (백강현T)", "t": ["백강현"], "r": "4", "s": "20:00", "e": "22:00", "k": "정규"}, {"n": "[녹지원]마스터반 영어 (폴&벤자민T)", "t": ["폴&벤자민"], "r": "8", "s": "09:00", "e": "13:00", "k": "정규"}, {"n": "[중2]광교중_국어 (백강현T)", "t": ["백강현"], "r": "4", "s": "17:00", "e": "19:00", "k": "정규"}, {"n": "[중2]연무중_국어 (백강현T)", "t": ["백강현"], "r": "7", "s": "17:00", "e": "19:00", "k": "정규"}, {"n": "[고2] 역학과 에너지 II (노현석T)", "t": ["노현석"], "r": "9", "s": "13:00", "e": "16:00", "k": "정규"}]}};
+var EXAM={
+ '10-01':[['유신고','통합과학2','지구시스템과학 · 여행지리 · 인공지능 수학']],
+ '10-02':[['유신고','공통수학2','법과 사회 · 세포와 물질대사 · 미적분1']],
+ '10-06':[['유신고','공통국어2','물질과 에너지 · 영어2']],
+ '10-07':[['유신고','한국사2 · 공통영어2','경제 · 역학과 에너지']],
+ '10-08':[['유신고','통합사회2','현대사회와 윤리 · 화법과 언어']],
+ '10-12':[['광교고','공통수학2','기하 · 영어2'],['창현고','공통영어2 · 한국사2','영어2 · 세포와 물질대사 · 동아시아 역사기행']],
+ '10-13':[['광교고','공통국어2','미적분1 · 역학과 에너지'],['창현고','공통수학2','미적분1 · 물질과 에너지 · 한국지리 탐구'],['이의고','통합사회2 · 공통영어2','영어2 · 세포와 물질대사']],
+ '10-14':[['광교고','공통영어2','지구시스템과학 · 세포와 물질대사'],['창현고','통합과학2','미적분2 등 선택과목 · 윤리와 사상 · 지구시스템과학'],['이의고','통합과학2','동아시아 역사 기행 · 물질과 에너지 · 지구시스템 과학']],
+ '10-15':[['광교고','통합과학2 · 통합사회2','물질과 에너지 · 한국지리 탐구'],['창현고','통합사회2','국제 관계의 이해 · 역학과 에너지'],['이의고','한국사2 · 공통수학2','독서와 작문 · 전자기와 양자']],
+ '10-16':[['광교고','한국사2','화법과 언어'],['창현고','공통국어2','화법과 언어 · 경제'],['이의고','공통국어2','한국지리 탐구 · 미적분1']]
+};
+var DATES=Object.keys(DATA.WD), TODAY='10-02';
+var ROOMS=['1','3','4','5','6','7','8','9','10'];
+var HS=9, HE=22, PX=46;
+var cur=DATES[0], tab='room';
+try{var sv=sessionStorage.getItem('tt');if(sv){var o=JSON.parse(sv);if(DATES.indexOf(o.d)>=0)cur=o.d;if(o.t==='teacher')tab='teacher';}}catch(e){}
+function mm(s){return +s.slice(0,2)*60+ +s.slice(3)}
+function lab(d){return d.replace('-','/').replace(/^0/,'')}
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+function short(n){return n.replace(/ \((?:[^()]*?)T\)/g,'').replace(/\((?:[^()]*?)T\)/g,'')}
+function title(it){return it.k==='직보'?it.n:short(it.n)}
+function hasJb(d){return DATA.days[d].some(function(x){return x.k==='직보'})}
+function mkChips(){
+  var h='';DATES.forEach(function(d){
+    var w=DATA.WD[d],cl='chip'+(d<TODAY?' past':'')+((w==='토'||w==='일')?' wk':'');
+    h+='<button class="'+cl+'" role="tab" data-d="'+d+'" aria-selected="'+(d===cur)+'">'+(hasJb(d)?'<span class="dot"></span>':'')+'<b>'+lab(d)+'</b>'+w+'</button>';
+  });
+  document.getElementById('chips').innerHTML=h;
+}
+function roomView(items){
+  var H=(HE-HS)*PX, h='<div class="gridbox"><div class="grid" style="--cols:'+ROOMS.length+';--h:'+H+'px;--hr:'+PX+'px">';
+  h+='<div class="gh"></div>';ROOMS.forEach(function(r){h+='<div class="gh">'+r+'강</div>'});
+  h+='<div class="times">';for(var t=HS;t<=HE;t++){if(t>HS&&t<HE||t===HS||t===HE)h+='<span style="top:'+((t-HS)*PX)+'px">'+t+':00</span>'}h+='</div>';
+  ROOMS.forEach(function(r){
+    h+='<div class="col">';
+    items.filter(function(x){return x.r===r}).forEach(function(x){
+      var top=(mm(x.s)-HS*60)/60*PX, ht=(mm(x.e)-mm(x.s))/60*PX-2;
+      var tg=x.k==='직보'?'<span class="tg tg-직보">직보</span>':(x.k!=='정규'?'<span class="tg tg-o">'+esc(x.k)+'</span>':'');
+      var tm=x.s+'–'+(x.note&&x.note.indexOf('미정')>=0?'?':x.e);
+      h+='<div class="blk k-'+x.k+'" style="top:'+top+'px;height:'+ht+'px" title="'+esc(title(x)+' · '+x.t.join(', ')+' · '+x.s+'–'+x.e)+'"><span class="nm">'+tg+esc(title(x))+'</span><span class="tm">'+esc(x.t.join(' · '))+'</span><span class="tm">'+tm+(x.c?' · '+x.c+'명':'')+'</span></div>';
+    });
+    h+='</div>';
+  });
+  h+='</div></div>';
+  var nr=items.filter(function(x){return ROOMS.indexOf(x.r)<0});
+  if(nr.length){h+='<div class="noroom"><b>원래 강의실에서 진행</b>'+nr.map(function(x){return '<span>'+esc(title(x))+' ('+x.t.join(', ')+', '+x.s+'–'+x.e+')</span>'}).join('')+'</div>'}
+  return h;
+}
+function teacherView(items){
+  var by={};items.forEach(function(x){x.t.forEach(function(t){(by[t]=by[t]||[]).push(x)})});
+  var names=Object.keys(by).sort(function(a,b){return a<b?-1:1});
+  var h='<div class="tlist">';
+  names.forEach(function(t){
+    var L=by[t].slice().sort(function(a,b){return mm(a.s)-mm(b.s)});
+    h+='<div class="tcard"><h3>'+esc(t)+'T</h3>';
+    L.forEach(function(x){
+      var others=x.t.filter(function(y){return y!==t});
+      h+='<div class="row k-'+x.k+'"><span class="a">'+(x.k==='직보'?'<span class="tg tg-직보" style="font-size:.68rem;padding:0 5px;border-radius:3px;margin-right:4px">직보</span>':'')+esc(title(x))+'</span><span class="b">'+x.s+'–'+x.e+' · '+(x.r?x.r+'강':'원래 강의실')+(x.k!=='정규'&&x.k!=='직보'?' · '+esc(x.k):'')+(x.c?' · '+x.c+'명':'')+'</span>'+(x.note?'<span class="note">'+esc(x.note)+'</span>':'')+'</div>';
+    });
+    h+='</div>';
+  });
+  return h+'</div>';
+}
+function render(){
+  var items=DATA.days[cur];
+  document.getElementById('dh').textContent=lab(cur)+'('+DATA.WD[cur]+')'+(cur<TODAY?' · 지난 일정':'');
+  var ex=EXAM[cur];document.getElementById('ex').innerHTML=ex?'시험: '+ex.map(function(e){return '<b>'+esc(e[0])+'</b> '+esc(e[1])}).join(' · '):'';
+  document.getElementById('view').innerHTML=items.length?(tab==='room'?roomView(items):teacherView(items)):'<div class="empty">이 날은 수업이 없습니다.</div>';
+  document.getElementById('t-room').setAttribute('aria-selected',tab==='room');
+  document.getElementById('t-teacher').setAttribute('aria-selected',tab==='teacher');
+  [].forEach.call(document.querySelectorAll('.chip'),function(c){c.setAttribute('aria-selected',c.dataset.d===cur)});
+  try{sessionStorage.setItem('tt',JSON.stringify({d:cur,t:tab}))}catch(e){}
+}
+document.getElementById('chips').addEventListener('click',function(e){var b=e.target.closest('.chip');if(b){cur=b.dataset.d;render()}});
+document.getElementById('t-room').onclick=function(){tab='room';render()};
+document.getElementById('t-teacher').onclick=function(){tab='teacher';render()};
+mkChips();render();
+</script>
