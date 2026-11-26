@@ -103,9 +103,11 @@
 
   /* 과목별 색상 클래스 */
   .c-math { color: #1b4f72; }
+  .c-kor  { color: #c0392b; }
   .c-eng  { color: #1e8449; }
 
   .bg-math { background-color: #1b4f72; }
+  .bg-kor  { background-color: #c0392b; }
   .bg-eng  { background-color: #1e8449; }
 
   /* 시간표 테이블 */
@@ -295,6 +297,7 @@
       <div class="main-title">예비고3 윈터특강 안내</div>
       <div class="legend">
         <div class="legend-item"><span class="legend-box bg-math"></span>수학</div>
+        <div class="legend-item"><span class="legend-box bg-kor"></span>국어</div>
         <div class="legend-item"><span class="legend-box bg-eng"></span>영어</div>
       </div>
     </div>
@@ -358,7 +361,7 @@
           <td class="study-cell">
             <div class="study-text">의무 자습</div>
           </td>
-          <!-- 토 (수정: 신영준T 수학 통합, 화목토반 반영) -->
+          <!-- 토 -->
           <td class="bg-green-col">
             <div class="class-block">
               <div class="subject-title c-math">수능 수1·수2<br>(광교·이의)</div>
@@ -370,9 +373,13 @@
               <div class="teacher-time">신영준T<br>09:00~13:00</div>
             </div>
           </td>
-          <!-- 일 -->
-          <td class="bg-green-col study-cell">
-            <div class="study-text">자율 자습</div>
+          <!-- 일 (수정 반영: 광교고 국어 박수진T 9~12시 수업, 12~1시 클리닉) -->
+          <td class="bg-green-col">
+            <div class="class-block">
+              <div class="subject-title c-kor">광교고 국어</div>
+              <div class="teacher-time">박수진T<br>09:00~13:00</div>
+            </div>
+ 
           </td>
         </tr>
 
@@ -416,7 +423,7 @@
           <td class="study-cell">
             <div class="study-text">의무 자습</div>
           </td>
-          <!-- 토 (수정: 영어 정시대비반 맥심T 14:00~18:00) -->
+          <!-- 토 -->
           <td class="bg-green-col">
             <div class="class-block">
               <div class="subject-title c-eng">영어 정시대비반</div>
@@ -445,7 +452,7 @@
           <td class="study-cell">
             <div class="study-text">의무 자습</div>
           </td>
-          <!-- 화 (수정: 신영준T 수학 통합, 화목토반 반영) -->
+          <!-- 화 -->
           <td class="bg-blue-col">
             <div class="class-block">
               <span class="badge-day">화목반</span>
@@ -466,7 +473,7 @@
           <td class="study-cell">
             <div class="study-text">의무 자습</div>
           </td>
-          <!-- 목 (수정: 신영준T 수학 통합, 화목토반 반영) -->
+          <!-- 목 -->
           <td class="bg-blue-col">
             <div class="class-block">
               <span class="badge-day">화목반</span>
