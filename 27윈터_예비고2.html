@@ -245,6 +245,19 @@
     font-weight: 500;
   }
 
+  .sub-slot {
+    margin-top: 6px;
+    padding-top: 5px;
+    border-top: 1px dashed #dce3ea;
+  }
+
+  .sub-slot-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.25;
+  }
+
   /* 자습 텍스트 */
   .study-cell {
     vertical-align: middle !important;
@@ -377,6 +390,7 @@
           <!-- 수 -->
           <td>
             <div class="class-block">
+              <span class="badge-day">수일반</span>
               <div class="subject-title c-math">대수 (이의·<br>광교 연합)</div>
               <div class="teacher-time">우지훈T<br>09:00~13:00</div>
             </div>
@@ -393,11 +407,11 @@
               <div class="teacher-time">이유진T<br>10:00~13:00</div>
             </div>
           </td>
-          <!-- 토 (수정: 오전 과학 삭제) -->
+          <!-- 토 -->
           <td class="bg-green-col study-cell">
             <div class="study-text">자율 자습</div>
           </td>
-          <!-- 일 (수정: 9시~1시 광교고3 국어 박수진T) -->
+          <!-- 일 -->
           <td class="bg-green-col">
             <div class="class-block">
               <div class="subject-title c-kor">광교고3 국어</div>
@@ -406,7 +420,7 @@
           </td>
         </tr>
 
-        <!-- 점심 시간 (일요일 13:00~14:00 클리닉 반영) -->
+        <!-- 점심 시간 -->
         <tr class="meal-row">
           <td class="meal-time">13:00~14:00</td>
           <td colspan="6" class="meal-label">점심 시간</td>
@@ -437,7 +451,8 @@
           <!-- 수 -->
           <td>
             <div class="class-block">
-              <div class="subject-title c-math">대수 클리닉<br>(이의·광교)</div>
+              <span class="badge-day">수일반</span>
+              <div class="subject-title c-math">대수 클리닉<br>(이의·광교 연합)</div>
               <div class="teacher-time">조교<br>14:00~17:00</div>
             </div>
           </td>
@@ -460,14 +475,15 @@
               <div class="teacher-time">전진선T<br>13:00~17:00</div>
             </div>
           </td>
-          <!-- 일 (수정: 2~5시 이의고2 국어 박수진T, 2~5시 대수 클리닉 우지훈T) -->
+          <!-- 일 -->
           <td class="bg-green-col">
             <div class="class-block">
               <div class="subject-title c-kor">이의고2 국어</div>
               <div class="teacher-time">박수진T<br>14:00~17:00</div>
             </div>
             <div class="class-block">
-              <div class="subject-title c-math">대수 클리닉</div>
+              <span class="badge-day">수일반</span>
+              <div class="subject-title c-math">대수 클리닉<br>(이의·광교 연합)</div>
               <div class="teacher-time">우지훈T<br>14:00~17:00</div>
             </div>
           </td>
@@ -492,11 +508,12 @@
           <!-- 화 -->
           <td class="bg-blue-col">
             <div class="class-block">
+              <span class="badge-day">화금반</span>
               <div class="subject-title c-math">수학 (유신·<br>창현)</div>
               <div class="teacher-time">윤재필T<br>18:00~22:00</div>
             </div>
           </td>
-          <!-- 수 (수정: 6~10시 과학 물리 노현석T) -->
+          <!-- 수 -->
           <td>
             <div class="class-block">
               <div class="subject-title c-sci">과학 (물리)</div>
@@ -513,15 +530,19 @@
           <!-- 금 -->
           <td>
             <div class="class-block">
-              <div class="subject-title c-math">테스트·오답<br>(유신·창현)</div>
-              <div class="teacher-time">조교<br>18:00~19:30</div>
-            </div>
-            <div class="class-block">
+              <span class="badge-day">화금반</span>
               <div class="subject-title c-math">수학 (유신·<br>창현)</div>
-              <div class="teacher-time">윤재필T<br>19:30~22:00</div>
+              <div class="sub-slot">
+                <div class="sub-slot-label">테스트·오답</div>
+                <div class="teacher-time">조교 · 18:00~19:30</div>
+              </div>
+              <div class="sub-slot">
+                <div class="sub-slot-label">수업</div>
+                <div class="teacher-time">윤재필T · 19:30~22:00</div>
+              </div>
             </div>
           </td>
-          <!-- 토 (수정: 19시 과학은 화학으로 변경) -->
+          <!-- 토 -->
           <td class="bg-green-col">
             <div class="class-block">
               <div class="subject-title c-kor">창현고 국어</div>
@@ -535,6 +556,7 @@
           <!-- 일 -->
           <td class="bg-green-col">
             <div class="class-block">
+              <span class="badge-day">수일반</span>
               <div class="subject-title c-math">대수 (이의·<br>광교 연합)</div>
               <div class="teacher-time">우지훈T<br>18:00~22:00</div>
             </div>
