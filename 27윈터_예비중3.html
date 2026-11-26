@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2027 예비중3 윈터특강 안내 - 대치SNT광교</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  }
+
+  body {
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .poster {
+    width: 794px; /* A4 비율 기준 */
+    min-height: 1123px;
+    background-color: #ffffff;
+    padding: 40px 36px 32px 36px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* 상단 헤더 */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid #2b4c7e;
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+  }
+
+  .academy-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #d97724;
+    letter-spacing: -0.5px;
+  }
+
+  .term-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111111;
+    letter-spacing: -0.5px;
+  }
+
+  /* 메인 타이틀 및 범례 */
+  .title-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 16px;
+  }
+
+  .main-title {
+    display: flex;
+    align-items: center;
+    font-size: 25px;
+    font-weight: 800;
+    color: #111111;
+    letter-spacing: -0.8px;
+  }
+
+  .main-title::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 24px;
+    background-color: #e67e22;
+    margin-right: 10px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #333333;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .legend-box {
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+  }
+
+  /* 과목별 색상 클래스 */
+  .c-math { color: #1b4f72; }
+  .c-kor  { color: #c0392b; }
+  .c-eng  { color: #1e8449; }
+  .c-sci  { color: #6c3483; }
+
+  .bg-math { background-color: #1b4f72; }
+  .bg-kor  { background-color: #c0392b; }
+  .bg-eng  { background-color: #1e8449; }
+  .bg-sci  { background-color: #6c3483; }
+
+  /* 시간표 테이블 */
+  table.timetable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    text-align: center;
+    border-bottom: 1.5px solid #cfd8dc;
+  }
+
+  table.timetable th {
+    background-color: #4f81bd;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 4px;
+    border-right: 1px solid #6b97cc;
+  }
+
+  table.timetable th:last-child {
+    border-right: none;
+  }
+
+  table.timetable td {
+    border-right: 1px solid #e1e6eb;
+    padding: 10px 4px;
+    vertical-align: top;
+  }
+
+  table.timetable td:last-child {
+    border-right: none;
+  }
+
+  /* 교시 열 */
+  td.period-col {
+    background-color: #f4f6f8;
+    vertical-align: middle;
+    color: #333333;
+  }
+
+  .period-name {
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .period-time {
+    font-size: 9.5px;
+    color: #666666;
+    line-height: 1.35;
+  }
+
+  /* 요일 배경색 */
+  .bg-blue-col { background-color: #eef5fc; }
+  .bg-green-col { background-color: #eff7f1; }
+
+  /* 식사 시간 행 */
+  tr.meal-row td {
+    background-color: #fdf2e9;
+    padding: 6px 4px;
+    border-top: 1px solid #f5cba7;
+    border-bottom: 1px solid #f5cba7;
+    vertical-align: middle;
+  }
+
+  .meal-time {
+    font-size: 10px;
+    font-weight: 700;
+    color: #444444;
+  }
+
+  .meal-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #d35400;
+    letter-spacing: 0.5px;
+  }
+
+  /* 수업 블록 스타일 */
+  .class-block {
+    margin-bottom: 12px;
+  }
+
+  .class-block:last-child {
+    margin-bottom: 0;
+  }
+
+  .badge-day {
+    display: inline-block;
+    background-color: #f8e5d6;
+    color: #b95814;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1.5px 6px;
+    border-radius: 3px;
+    margin-bottom: 4px;
+  }
+
+  .subject-title {
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 3px;
+    letter-spacing: -0.4px;
+    word-break: keep-all;
+  }
+
+  .teacher-time {
+    font-size: 9.5px;
+    color: #555555;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+
+  /* 자습 텍스트 */
+  .study-cell {
+    vertical-align: middle !important;
+  }
+
+  .study-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #5a6570;
+  }
+
+  .study-sub {
+    font-size: 9.5px;
+    color: #666666;
+    margin-top: 2px;
+  }
+
+  /* 하단 안내 및 푸터 */
+  .notice-area {
+    margin-top: 14px;
+    font-size: 10px;
+    color: #666666;
+    line-height: 1.55;
+    letter-spacing: -0.2px;
+  }
+
+  .slogan {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6c7a89;
+    margin-top: 18px;
+    margin-bottom: 12px;
+  }
+
+  .footer-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #d5dce2;
+    padding-top: 8px;
+    font-size: 10.5px;
+    color: #444444;
+    font-weight: 600;
+  }
+
+  .footer-page {
+    font-weight: 800;
+    font-size: 12px;
+    color: #222222;
+  }
+
+  @media print {
+    body {
+      background: none;
+      padding: 0;
+    }
+    .poster {
+      box-shadow: none;
+      width: 100%;
+      min-height: auto;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="poster">
+  <div>
+    <!-- 최상단 헤더 -->
+    <div class="top-bar">
+      <div class="academy-name">대치SNT광교</div>
+      <div class="term-title">2027 예비중3 윈터특강</div>
+    </div>
+
+    <!-- 메인 타이틀 & 범례 -->
+    <div class="title-area">
+      <div class="main-title">예비중3 윈터특강 안내</div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-box bg-math"></span>수학</div>
+        <div class="legend-item"><span class="legend-box bg-kor"></span>국어</div>
+        <div class="legend-item"><span class="legend-box bg-eng"></span>영어</div>
+        <div class="legend-item"><span class="legend-box bg-sci"></span>과학</div>
+      </div>
+    </div>
+
+    <!-- 시간표 본문 -->
+    <table class="timetable">
+      <colgroup>
+        <col style="width: 10%;">
+        <col style="width: 12.85%;">
+        <col style="width: 12.85%;">
+        <col style="width: 12.85%;">
+        <col style="width: 12.85%;">
+        <col style="width: 12.85%;">
+        <col style="width: 12.85%;">
+        <col style="width: 12.85%;">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>월</th>
+          <th>화</th>
+          <th>수</th>
+          <th>목</th>
+          <th>금</th>
+          <th>토</th>
+          <th>일</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 1교시 -->
+        <tr style="height: 215px;">
+          <td class="period-col">
+            <div class="period-name">1교시</div>
+            <div class="period-time">오전<br>09:00~13:00</div>
+          </td>
+          <!-- 월 -->
+          <td class="study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 화 -->
+          <td class="bg-blue-col study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 수 -->
+          <td class="study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 목 -->
+          <td class="bg-blue-col study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 금 -->
+          <td class="study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 토 -->
+          <td class="bg-green-col">
+            <div class="class-block">
+              <span class="badge-day">월수토반</span>
+              <div class="subject-title c-math">수학 클리닉</div>
+              <div class="teacher-time">09:00~13:00</div>
+            </div>
+          </td>
+          <!-- 일 -->
+          <td class="bg-green-col study-cell">
+            <div class="study-text">자율 자습</div>
+          </td>
+        </tr>
+
+        <!-- 점심 시간 -->
+        <tr class="meal-row">
+          <td class="meal-time">13:00~14:00</td>
+          <td colspan="7" class="meal-label">점심 시간</td>
+        </tr>
+
+        <!-- 2교시 -->
+        <tr style="height: 225px;">
+          <td class="period-col">
+            <div class="period-name">2교시</div>
+            <div class="period-time">오후<br>14:00~17:00</div>
+          </td>
+          <!-- 월 -->
+          <td class="study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 화 -->
+          <td class="bg-blue-col study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 수 -->
+          <td class="study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 목 -->
+          <td class="bg-blue-col study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 금 -->
+          <td class="study-cell">
+            <div class="study-text">의무 자습</div>
+          </td>
+          <!-- 토 (수정: 노현석T 추가) -->
+          <td class="bg-green-col">
+            <div class="class-block">
+              <div class="subject-title c-sci">통합과학1</div>
+              <div class="teacher-time">노현석T<br>13:00~16:00</div>
+            </div>
+            <div class="study-text" style="margin-top: 12px;">자율 자습</div>
+            <div class="study-sub">16:00~17:00</div>
+          </td>
+          <!-- 일 -->
+          <td class="bg-green-col study-cell">
+            <div class="study-text">자율 자습</div>
+          </td>
+        </tr>
+
+        <!-- 저녁 시간 -->
+        <tr class="meal-row">
+          <td class="meal-time">17:00~18:00</td>
+          <td colspan="7" class="meal-label">저녁 시간</td>
+        </tr>
+
+        <!-- 3교시 -->
+        <tr style="height: 245px;">
+          <td class="period-col">
+            <div class="period-name">3교시</div>
+            <div class="period-time">저녁<br>18:00~22:00</div>
+          </td>
+          <!-- 월 -->
+          <td>
+            <div class="class-block">
+              <span class="badge-day">월수토반</span>
+              <div class="subject-title c-math">수학 수업</div>
+              <div class="teacher-time">18:00~22:00</div>
+            </div>
+          </td>
+          <!-- 화 -->
+          <td class="bg-blue-col">
+            <div class="class-block">
+              <span class="badge-day">화목반</span>
+              <div class="subject-title c-eng">영어 수업</div>
+              <div class="teacher-time">서현수T<br>18:00~22:00</div>
+            </div>
+          </td>
+          <!-- 수 -->
+          <td>
+            <div class="class-block">
+              <span class="badge-day">월수토반</span>
+              <div class="subject-title c-math">수학 수업</div>
+              <div class="teacher-time">18:00~22:00</div>
+            </div>
+          </td>
+          <!-- 목 -->
+          <td class="bg-blue-col">
+            <div class="class-block">
+              <span class="badge-day">화목반</span>
+              <div class="subject-title c-eng">영어 클리닉</div>
+              <div class="teacher-time">서현수T<br>18:00~22:00</div>
+            </div>
+          </td>
+          <!-- 금 -->
+          <td>
+            <div class="class-block">
+              <div class="subject-title c-kor">국어</div>
+              <div class="teacher-time">엄태욱T<br>18:00~21:00</div>
+            </div>
+            <div class="study-text" style="margin-top: 14px;">의무 자습</div>
+            <div class="study-sub">21:00~22:00</div>
+          </td>
+          <!-- 토 -->
+          <td class="bg-green-col study-cell">
+            <div class="study-text">자율 자습</div>
+          </td>
+          <!-- 일 -->
+          <td class="bg-green-col study-cell">
+            <div class="study-text">자율 자습</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 하단 주석 -->
+    <div class="notice-area">
+      ※ 모든 수업 2027년 1월 4일(월) 시작 · 평일 빈 시간은 의무 자습(오전 10시 시작), 토·일은 자율 자습 · 시간표는 학원 사정에 따라 변경될 수 있습니다.
+    </div>
+  </div>
+
+  <!-- 슬로건 및 푸터 -->
+  <div>
+    <div class="slogan">이번 겨울, 우리가 이겨. 쉬어가는 방학이 아니라 앞서가는 방학으로.</div>
+    <div class="footer-bar">
+      <div>대치SNT광교 ☎ 031-895-5003</div>
+      <div class="footer-page">01</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
